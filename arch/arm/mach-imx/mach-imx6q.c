@@ -41,6 +41,9 @@
 #include "cpuidle.h"
 #include "hardware.h"
 
+#include "apx_wdog-trigger.h"
+
+
 /* For imx6q sabrelite board: set KSZ9021RN RGMII pad skew */
 static int ksz9021rn_phy_fixup(struct phy_device *phydev)
 {
@@ -315,9 +318,34 @@ static inline void imx6q_enet_init(void)
 		imx6q_enet_clk_sel();
 }
 
+
+static const struct apx_wdog_trigger_data apx_wdt __initconst = {
+	.gpio_trg__iomux_ctrl   = 0x020e00b8,
+	.gpio_trg__pad_ctrl     = 0x20e03cc,
+	.gpio_trg__base         = 0x020a4000,
+	.gpio_trg__num           = 25,
+	.gpio_en__iomux_ctrl    = 0x20e020c,
+	.gpio_en__pad_ctrl      = 0x20e05dc,
+	.gpio_en__base          = 0x020a8000,
+	.gpio_en__num           = 11,
+};
+
+
+
 static void __init imx6q_init_machine(void)
 {
 	struct device *parent;
+	struct device_node *np = NULL;
+	
+	struct clk *p_clk = NULL;
+	int ret;
+	
+	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
+			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
+	
+			apx_wdog_trigger_early_init (&apx_wdt, 1);
+	
+	}
 
 	if (cpu_is_imx6q() && imx_get_soc_revision() >= IMX_CHIP_REVISION_2_0)
 		imx_print_silicon_rev("i.MX6QP", IMX_CHIP_REVISION_1_0);
@@ -336,6 +364,35 @@ static void __init imx6q_init_machine(void)
 	imx6q_csi_mux_init();
 	cpu_is_imx6q() ?  imx6q_pm_init() : imx6dl_pm_init();
 	imx6q_axi_init();
+
+	if ( of_machine_is_compatible("fsl,imx6q-SBC_A62") ||
+			of_machine_is_compatible("fsl,imx6dl-SBC_A62") ) {
+
+		apx_wdog_trigger_work_init(1);
+
+		/*   set clock CKO2 to use the USBH1 with external clock  */
+		np = of_find_node_by_path("/external_clocks");
+		if ( !np ) {
+			pr_warn ("%s: failed to get %s structure\n", __func__, "/external_clocks");
+			goto put_node;
+		}
+		p_clk = of_clk_get (np, 0);
+		if ( IS_ERR(p_clk) ) {
+			pr_warn("%s: failed to get clock\n", __func__);
+			goto put_node;
+		}
+		ret = clk_prepare_enable (p_clk);
+		if (ret) {
+			pr_err ("can't enable clock\n");
+		} else {
+			pr_info ("clock enabled\n");
+		}
+	}
+
+	clk_put (p_clk);
+put_node:
+	of_node_put(np);
+
 }
 
 #define OCOTP_CFG3			0x440

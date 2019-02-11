@@ -94,7 +94,7 @@ AFLAGS_ddr3_freq_imx6.o :=-Wa,-march=armv7-a
 AFLAGS_smp_wfe_imx6.o :=-Wa,-march=armv7-a
 AFLAGS_lpddr2_freq_imx6q.o :=-Wa,-march=armv7-a
 obj-$(CONFIG_SOC_IMX6Q) += mach-imx6q.o ddr3_freq_imx6.o smp_wfe_imx6.o \
-			   lpddr2_freq_imx6q.o
+			   lpddr2_freq_imx6q.o apx_wdog-trigger.o
 AFLAGS_lpddr2_freq_imx6.o :=-Wa,-march=armv7-a
 obj-$(CONFIG_SOC_IMX6SL) += mach-imx6sl.o lpddr2_freq_imx6.o
 AFLAGS_lpddr2_freq_imx6sll.o :=-Wa,-march=armv7-a
