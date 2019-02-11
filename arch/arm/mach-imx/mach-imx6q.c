@@ -24,6 +24,7 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
+#include <linux/gpio.h>
 #include <linux/pm_opp.h>
 #include <linux/pci.h>
 #include <linux/phy.h>
@@ -33,6 +34,7 @@
 #include <linux/mfd/syscon.h>
 #include <linux/mfd/syscon/imx6q-iomuxc-gpr.h>
 #include <linux/of_net.h>
+#include <linux/of_gpio.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/system_misc.h>
@@ -42,6 +44,11 @@
 #include "hardware.h"
 
 #include "apx_wdog-trigger.h"
+
+
+static int power_gpio = -1;
+static int power_gpio_pol = 0;
+static int only_for_poweroff = 0;
 
 
 /* For imx6q sabrelite board: set KSZ9021RN RGMII pad skew */
@@ -484,8 +491,46 @@ static struct platform_device imx6q_cpufreq_pdev = {
 	.name = "imx6q-cpufreq",
 };
 
+
+static void imx6q_poweroff (void) {
+	int ret;
+
+printk (KERN_ERR "----------%s\n", __func__);
+	if ( power_gpio_pol	)
+		ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_HIGH, "power_gpio");
+	else
+		ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_LOW, "power_gpio");
+
+	if ( ret < 0)
+		printk (KERN_ERR "(%d) Unable to get kill power GPIO (%d)\n", ret, power_gpio);
+};
+
+
+void imx6q_restart (enum reboot_mode reboot_mode, const char *cmd) {
+	int ret = 0;
+	int ectrl_signed = 0;
+printk (KERN_ERR "----------%s\n", __func__);
+	if ( !only_for_poweroff ) {
+		if ( power_gpio_pol	)
+			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_HIGH, "power_gpio");
+		else
+			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_LOW, "power_gpio");
+
+		if ( ret < 0)
+			printk (KERN_ERR "Unable to get kill power GPIO\n");
+		else {
+			ectrl_signed = 1;
+		}
+	}
+
+	if ( !ectrl_signed )
+		mxc_restart (reboot_mode, cmd);
+}
+
+
 static void __init imx6q_init_late(void)
 {
+	struct device_node *np;
 	/*
 	 * WAIT mode is broken on TO 1.0 and 1.1, so there is no point
 	 * to run cpuidle on them.
@@ -499,7 +544,20 @@ static void __init imx6q_init_late(void)
 		imx6q_opp_init();
 		platform_device_register(&imx6q_cpufreq_pdev);
 	}
+
+	np = of_find_node_by_path ("/power_signal");
+	if ( np ) {
+		power_gpio = of_get_named_gpio (np, "power-gpio", 0);
+		if ( gpio_is_valid (power_gpio) ) {
+			pm_power_off = imx6q_poweroff;
+		}
+		power_gpio_pol = of_property_read_bool(np, "set_high");
+		only_for_poweroff = of_property_read_bool(np, "only_for_poweroff");
+		np = NULL;
+	}
+
 }
+
 
 static void __init imx6q_map_io(void)
 {
@@ -535,4 +593,7 @@ DT_MACHINE_START(IMX6Q, "Freescale i.MX6 Quad/DualLite (Device Tree)")
 	.init_machine	= imx6q_init_machine,
 	.init_late      = imx6q_init_late,
 	.dt_compat	= imx6q_dt_compat,
+	.restart	= imx6q_restart,
+	.pwroff = imx6q_poweroff,
+
 MACHINE_END

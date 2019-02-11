@@ -22,6 +22,7 @@ typedef void (*phys_reset_t)(unsigned long, bool);
  * Function pointers to optional machine specific functions
  */
 void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+void (*arm_pm_poweroff)(void);
 void (*pm_power_off)(void);
 EXPORT_SYMBOL(pm_power_off);
 
@@ -107,6 +108,10 @@ void machine_halt(void)
 {
 	local_irq_disable();
 	smp_send_stop();
+
+	if ( arm_pm_poweroff )
+		arm_pm_poweroff ();
+
 	while (1);
 }
 

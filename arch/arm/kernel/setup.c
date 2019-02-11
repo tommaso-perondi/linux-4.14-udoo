@@ -1113,6 +1113,9 @@ void __init setup_arch(char **cmdline_p)
 	if (mdesc->restart)
 		arm_pm_restart = mdesc->restart;
 
+	if (mdesc->pwroff)
+		arm_pm_poweroff = mdesc->pwroff;
+
 	unflatten_device_tree();
 
 	arm_dt_init_cpu_maps();

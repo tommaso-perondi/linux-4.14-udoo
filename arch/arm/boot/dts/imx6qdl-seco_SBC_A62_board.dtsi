@@ -168,6 +168,30 @@ backlight {
 
 /*  __________________________________________________________________________
  * |                                                                          |
+ * |                             POWER MANAGEMENT                             |
+ * |__________________________________________________________________________|
+ */
+/ {
+	power_signal: power_signal {
+		power-gpio = <&gpio2 4 0>;
+		set_high;
+		only_for_poweroff;
+	};
+
+	pwr_button: pwr_button {
+		compatible       = "seco,power_button";
+		interrupt-parent = <&gpio2>;
+		interrupts       = <3 IRQ_TYPE_LEVEL_LOW>;
+		halt-gpio        = <&gpio2 4 GPIO_ACTIVE_LOW>;
+		pwr-gpio         = <&gpio2 3 GPIO_ACTIVE_LOW>;
+
+	};
+};
+
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
  * |                                    CAN                                   |
  * |__________________________________________________________________________|
  */
