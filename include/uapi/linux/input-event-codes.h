@@ -687,6 +687,14 @@
 #define BTN_TRIGGER_HAPPY39		0x2e6
 #define BTN_TRIGGER_HAPPY40		0x2e7
 
+#define BTN_ECTRL_PWR           0x152
+#define BTN_ECTRL_BATLOW_HL     0x153
+#define BTN_ECTRL_BATLOW_LH     0x154
+#define BTN_ECTRL_LID_HL        0x155
+#define BTN_ECTRL_LID_LH        0x156
+#define BTN_ECTRL_SLEEP         0x157
+#define BTN_ECTRL_WAKE          0x158
+
 /* We avoid low common keys in module aliases so they don't get huge. */
 #define KEY_MIN_INTERESTING	KEY_MUTE
 #define KEY_MAX			0x2ff

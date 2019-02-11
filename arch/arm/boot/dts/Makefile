@@ -496,7 +496,15 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
 	imx6qp-sabresd-hdcp.dtb \
 	imx6qp-sabresd-ldo.dtb \
 	imx6qp-sabresd-ldo-pcie-cert.dtb \
-	imx6qp-zii-rdu2.dtb
+	imx6qp-zii-rdu2.dtb \
+	imx6q-seco_SBC_A62.dtb \
+	imx6dl-seco_SBC_A62.dtb \
+	imx6q-seco_uq7_962.dtb \
+	imx6dl-seco_uq7_962.dtb \
+	imx6q-seco_uQ7_J_A75.dtb \
+	imx6dl-seco_uQ7_J_A75.dtb \
+	imx6q-seco_quadmo747_928.dtb \
+	imx6dl-seco_quadmo747_928.dtb
 dtb-$(CONFIG_SOC_IMX6SL) += \
 	imx6sl-evk.dtb \
 	imx6sl-evk-btwifi.dtb \

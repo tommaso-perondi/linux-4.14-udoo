@@ -409,6 +409,37 @@ int of_property_read_string(const struct device_node *np, const char *propname,
 }
 EXPORT_SYMBOL_GPL(of_property_read_string);
 
+
+/* *
+ * of_property_write_string - Find and write a string to a property
+ * @np:		device node from which the property value is to be write.
+ * @propname:	name of the property to be searched.
+ * @in_string:	pointer to string to write.
+ *
+ * Search for a property in a device tree node and retrieve a null
+ * terminated string value (pointer to data, not a copy). Returns 0 on
+ * success, -EINVAL if the property does not exist, -ENODATA if property
+ * does not have a value, and -EILSEQ if the string is not null-terminated
+ * within the length of the property data.
+ *
+ * The out_string pointer is modified only if a valid string can be decoded.
+ */
+int of_property_write_string(struct device_node *np, const char *propname,
+		const char *in_string)
+{
+	struct property *prop = of_find_property(np, propname, NULL);
+	if (!prop)
+		return -EINVAL;
+	if (!prop->value)
+		return -ENODATA;
+	if (strnlen(prop->value, prop->length) >= prop->length)
+		return -EILSEQ;
+	strcpy ((char *)prop->value, in_string);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_property_write_string);
+
+
 /**
  * of_property_match_string() - Find string in a list and return index
  * @np: pointer to node containing string list property

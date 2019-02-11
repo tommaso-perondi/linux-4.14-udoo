@@ -326,6 +326,9 @@ extern int of_property_read_variable_u64_array(const struct device_node *np,
 					u64 *out_values,
 					size_t sz_min,
 					size_t sz_max);
+extern int of_property_write_string(struct device_node *np,
+				   const char *propname,
+				   const char *in_string);
 
 extern int of_property_read_string(const struct device_node *np,
 				   const char *propname,
