@@ -87,6 +87,7 @@ int imx_mu_lpm_ready(bool ready);
 #else
 static inline int imx_mu_lpm_ready(bool ready) { return 0; }
 #endif
+void mxc_arch_reset_init_dt(void);
 
 enum mxc_cpu_pwr_mode {
 	WAIT_CLOCKED,		/* wfi only */
