@@ -35,6 +35,7 @@
 static void __iomem *wdog_base;
 static struct clk *wdog_clk;
 static int wcr_enable = (1 << 2);
+static u32 wdog_source = 1;
 
 /*
  * Reset the system. It is called by machine_restart().
@@ -81,6 +82,41 @@ void __init mxc_arch_reset_init(void __iomem *base)
 		pr_warn("%s: failed to get wdog clock\n", __func__);
 	else
 		clk_prepare(wdog_clk);
+}
+
+void __init mxc_arch_reset_init_dt(void)
+{
+        struct device_node *np = NULL;
+
+        if (cpu_is_imx6q() || cpu_is_imx6dl())
+                np = of_find_compatible_node(NULL, NULL, "fsl,imx6q-gpc");
+        else if (cpu_is_imx6sl())
+                np = of_find_compatible_node(NULL, NULL, "fsl,imx6sl-gpc");
+
+        if (np)
+                of_property_read_u32(np, "fsl,wdog-reset", &wdog_source);
+        pr_info("Use WDOG%d as reset source\n", wdog_source);
+
+        np = of_find_compatible_node(NULL, NULL, "fsl,imx21-wdt");
+        wdog_base = of_iomap(np, 0);
+        WARN_ON(!wdog_base);
+
+        /* Some i.MX6 boards use WDOG2 to reset board in ldo-bypass mode */
+        if (wdog_source == 2 && (cpu_is_imx6q() || cpu_is_imx6dl() ||
+                cpu_is_imx6sl())) {
+                np = of_find_compatible_node(np, NULL, "fsl,imx21-wdt");
+                wdog_base = of_iomap(np, 0);
+                WARN_ON(!wdog_base);
+        }
+
+        wdog_clk = of_clk_get(np, 0);
+        if (IS_ERR(wdog_clk)) {
+                pr_warn("%s: failed to get wdog clock\n", __func__);
+                wdog_clk = NULL;
+                return;
+        }
+
+        clk_prepare(wdog_clk);
 }
 
 #ifdef CONFIG_SOC_IMX1

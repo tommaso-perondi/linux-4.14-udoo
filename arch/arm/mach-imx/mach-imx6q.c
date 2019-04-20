@@ -360,6 +360,10 @@ static void __init imx6q_init_machine(void)
 		imx_print_silicon_rev(cpu_is_imx6dl() ? "i.MX6DL" : "i.MX6Q",
 				imx_get_soc_revision());
 
+	if ( of_machine_is_compatible("fsl,imx6q-uq7-j_A75") || 
+			of_machine_is_compatible("fsl,imx6dl-uq7-j_A75"))
+		mxc_arch_reset_init_dt();	
+
 	parent = imx_soc_device_init();
 	if (parent == NULL)
 		pr_warn("failed to initialize soc device\n");
@@ -496,13 +500,16 @@ static void imx6q_poweroff (void) {
 	int ret;
 
 printk (KERN_ERR "----------%s\n", __func__);
-	if ( power_gpio_pol	)
-		ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_HIGH, "power_gpio");
-	else
-		ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_LOW, "power_gpio");
+	if ( gpio_is_valid (power_gpio) ) {
 
-	if ( ret < 0)
-		printk (KERN_ERR "(%d) Unable to get kill power GPIO (%d)\n", ret, power_gpio);
+		if ( power_gpio_pol	)
+			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_HIGH, "power_gpio");
+		else
+			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_LOW, "power_gpio");
+		
+		if ( ret < 0)
+			printk (KERN_ERR "(%d) Unable to get kill power GPIO (%d)\n", ret, power_gpio);
+	}
 };
 
 
@@ -511,16 +518,16 @@ void imx6q_restart (enum reboot_mode reboot_mode, const char *cmd) {
 	int ectrl_signed = 0;
 printk (KERN_ERR "----------%s\n", __func__);
 	if ( !only_for_poweroff ) {
+		if ( gpio_is_valid (power_gpio) ) {
+
 		if ( power_gpio_pol	)
 			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_HIGH, "power_gpio");
 		else
 			ret = gpio_request_one (power_gpio, GPIOF_OUT_INIT_LOW, "power_gpio");
-
+		
 		if ( ret < 0)
-			printk (KERN_ERR "Unable to get kill power GPIO\n");
-		else {
-			ectrl_signed = 1;
-		}
+			printk (KERN_ERR "(%d) Unable to get kill power GPIO (%d)\n", ret, power_gpio);
+	}
 	}
 
 	if ( !ectrl_signed )
