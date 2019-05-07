@@ -2999,6 +2999,7 @@ static int mxcfb_dispdrv_init(struct platform_device *pdev,
 	setting.if_fmt = plat_data->interface_pix_fmt;
 	setting.dft_mode_str = plat_data->mode_str;
 	setting.default_bpp = plat_data->default_bpp;
+	setting.datamap = plat_data->datamap;
 	if (!setting.default_bpp)
 		setting.default_bpp = 16;
 	setting.fbi = fbi;
@@ -3038,7 +3039,7 @@ static int mxcfb_dispdrv_init(struct platform_device *pdev,
 /*
  * Parse user specified options (`video=trident:')
  * example:
- * 	video=mxcfb0:dev=lcd,800x480M-16@55,if=RGB565,bpp=16,noaccel
+ * 	video=mxcfb0:dev=lcd,800x480M-16@55,if=RGB565,datamap=spwg,bpp=16,noaccel
  *	video=mxcfb0:dev=lcd,800x480M-16@55,if=RGB565,fbpix=RGB565
  */
 static int mxcfb_option_setup(struct platform_device *pdev, struct fb_info *fbi)
@@ -3048,6 +3049,7 @@ static int mxcfb_option_setup(struct platform_device *pdev, struct fb_info *fbi)
 	char name[] = "mxcfb0";
 	uint32_t fb_pix_fmt = 0;
 
+	pdata->datamap = BIT_MAP_NONE;
 	name[5] += pdev->id;
 	if (fb_get_options(name, &options)) {
 		dev_err(&pdev->dev, "Can't get fb option for %s!\n", name);
@@ -3110,6 +3112,11 @@ static int mxcfb_option_setup(struct platform_device *pdev, struct fb_info *fbi)
 				pdata->default_bpp =
 					fbi->var.bits_per_pixel;
 			}
+		} else if (!strncmp(opt, "datamap=", 8)) {
+			if (!strncmp(opt+8, "spwg", 4))
+				pdata->datamap = BIT_MAP_SPWG;
+			else if (!strncmp(opt+8, "jeida", 5))
+				pdata->datamap = BIT_MAP_JEIDA;
 		} else if (!strncmp(opt, "int_clk", 7)) {
 			pdata->int_clk = true;
 			continue;

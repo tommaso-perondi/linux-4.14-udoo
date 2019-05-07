@@ -20,6 +20,7 @@ int of_get_display_timing(const struct device_node *np, const char *name,
 		struct display_timing *dt);
 struct display_timings *of_get_display_timings(const struct device_node *np);
 int of_display_timings_exist(const struct device_node *np);
+struct display_timing *of_get_display_timing_by_name(struct device_node *np, const char *name);
 #else
 static inline int of_get_display_timing(const struct device_node *np,
 		const char *name, struct display_timing *dt)

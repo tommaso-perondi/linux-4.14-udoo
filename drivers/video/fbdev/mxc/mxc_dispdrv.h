@@ -28,6 +28,13 @@ struct mxc_dispdrv_setting {
 
 	/* feedback parameter */
 	enum crtc crtc;
+	int datamap;
+};
+
+enum {
+	BIT_MAP_SPWG,
+	BIT_MAP_JEIDA,
+	BIT_MAP_NONE = 255,
 };
 
 struct mxc_dispdrv_driver {

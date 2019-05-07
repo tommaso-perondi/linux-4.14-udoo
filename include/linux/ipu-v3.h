@@ -747,6 +747,7 @@ struct ipuv3_fb_platform_data {
 	u32				interface_pix_fmt;
 	char				*mode_str;
 	int				default_bpp;
+	int                 datamap;
 	bool				int_clk;
 
 	/* reserved mem */
