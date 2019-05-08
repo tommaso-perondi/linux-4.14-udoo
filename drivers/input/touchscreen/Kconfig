@@ -1272,6 +1272,7 @@ config TOUCHSCREEN_ROHM_BU21023
 	  module will be called bu21023_ts.
 
 source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+source "drivers/input/touchscreen/gt9xx/Kconfig"
 endif
 
 source "drivers/input/touchscreen/focaltech_touch/Kconfig"
