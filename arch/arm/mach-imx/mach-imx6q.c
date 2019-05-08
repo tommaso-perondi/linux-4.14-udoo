@@ -499,7 +499,6 @@ static struct platform_device imx6q_cpufreq_pdev = {
 static void imx6q_poweroff (void) {
 	int ret;
 
-printk (KERN_ERR "----------%s\n", __func__);
 	if ( gpio_is_valid (power_gpio) ) {
 
 		if ( power_gpio_pol	)
@@ -516,7 +515,7 @@ printk (KERN_ERR "----------%s\n", __func__);
 void imx6q_restart (enum reboot_mode reboot_mode, const char *cmd) {
 	int ret = 0;
 	int ectrl_signed = 0;
-printk (KERN_ERR "----------%s\n", __func__);
+	
 	if ( !only_for_poweroff ) {
 		if ( gpio_is_valid (power_gpio) ) {
 
