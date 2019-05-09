@@ -22,9 +22,8 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/regulator/userspace-consumer.h>
-#include <linux/of.h>
-#include <linux/regulator/of_regulator.h>
 #include <linux/slab.h>
+#include <linux/of.h>
 
 struct userspace_consumer_data {
 	const char *name;
@@ -107,51 +106,54 @@ static const struct attribute_group attr_group = {
 	.attrs	= attributes,
 };
 
-#if defined(CONFIG_OF)
-static struct regulator_userspace_consumer_data*
-	of_get_uc_config(struct device *dev, struct device_node *np)
+
+static struct regulator_userspace_consumer_data *get_pdata_from_dt_node(
+		struct platform_device *pdev)
 {
-	struct regulator_userspace_consumer_data *ucd;
-	int r;
+	struct regulator_userspace_consumer_data *pdata;
+	struct device_node *np = pdev->dev.of_node;
+	struct property *prop;
+	const char *supply;
+	int num_supplies;
+	int count = 0;
 
-	ucd = devm_kzalloc(dev, sizeof(struct regulator_userspace_consumer_data)
-				+ sizeof(struct regulator_bulk_data),
-				GFP_KERNEL);
-	if (ucd == NULL)
-		return NULL;
+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+	if (!pdata)
+		return ERR_PTR(-ENOMEM);
 
-	r = of_property_read_string(np, "uc-name", &ucd->name);
-	if (r) {
-		goto err;
+	pdata->name = of_get_property(np, "regulator-name", NULL);
+	pdata->init_on = of_property_read_bool(np, "regulator-boot-on");
+
+	num_supplies = of_property_count_strings(np, "regulator-supplies");
+	if (num_supplies < 0) {
+		dev_err(&pdev->dev,
+				"could not parse property regulator-supplies\n");
+		return ERR_PTR(-EINVAL);
 	}
+	pdata->num_supplies = num_supplies;
+	pdata->supplies = devm_kzalloc(&pdev->dev, num_supplies *
+			sizeof(*pdata->supplies), GFP_KERNEL);
+	if (!pdata->supplies)
+		return ERR_PTR(-ENOMEM);
 
-	ucd->num_supplies = 1;
-	ucd->supplies = (struct regulator_bulk_data *)&ucd[1];
+	of_property_for_each_string(np, "regulator-supplies", prop, supply)
+		pdata->supplies[count++].supply = supply;
 
-	r = of_property_read_string(np, "suck-supply", &ucd->supplies->supply);
-	if (r) {
-		goto err;
-	}
-	return ucd;
-
-err:
-	devm_kfree(dev, ucd);
-	return NULL;
+	return pdata;
 }
-#endif
+
 
 static int regulator_userspace_consumer_probe(struct platform_device *pdev)
 {
 	struct regulator_userspace_consumer_data *pdata;
 	struct userspace_consumer_data *drvdata;
 	int ret;
-
 	pdata = dev_get_platdata(&pdev->dev);
-#if defined(CONFIG_OF)
 	if (!pdata && pdev->dev.of_node) {
-		pdata = of_get_uc_config(&pdev->dev, pdev->dev.of_node);
+		pdata = get_pdata_from_dt_node(pdev);
+		if (IS_ERR(pdata))
+			return PTR_ERR(pdata);
 	}
-#endif
 	if (!pdata)
 		return -EINVAL;
 
@@ -170,7 +172,6 @@ static int regulator_userspace_consumer_probe(struct platform_device *pdev)
 	ret = devm_regulator_bulk_get(&pdev->dev, drvdata->num_supplies,
 				      drvdata->supplies);
 	if (ret) {
-		dev_err(&pdev->dev, "Failed to get supplies: %d\n", ret);
 		return ret;
 	}
 
@@ -182,16 +183,12 @@ static int regulator_userspace_consumer_probe(struct platform_device *pdev)
 		ret = regulator_bulk_enable(drvdata->num_supplies,
 					    drvdata->supplies);
 		if (ret) {
-			dev_err(&pdev->dev,
-				"Failed to set initial state: %d\n", ret);
 			goto err_enable;
 		}
 	}
 
 	drvdata->enabled = pdata->init_on;
 	platform_set_drvdata(pdev, drvdata);
-
-	dev_info(&pdev->dev, "attached: %s\n", drvdata->name);
 
 	return 0;
 
@@ -213,22 +210,19 @@ static int regulator_userspace_consumer_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_OF)
-static const struct of_device_id uc_of_match[] = {
-	{ .compatible = "userspace_consumer", },
+static const struct of_device_id regulator_userspace_consumer_of_match[] = {
+	{ .compatible = "reg-userspace-consumer", },
 	{},
 };
-#endif
+MODULE_DEVICE_TABLE(of, regulator_userspace_consumer_of_match);
+
 
 static struct platform_driver regulator_userspace_consumer_driver = {
 	.probe		= regulator_userspace_consumer_probe,
 	.remove		= regulator_userspace_consumer_remove,
 	.driver		= {
+		.of_match_table = regulator_userspace_consumer_of_match,
 		.name		= "reg-userspace-consumer",
-		.owner		= THIS_MODULE,
-#if defined(CONFIG_OF)
-		.of_match_table = of_match_ptr(uc_of_match),
-#endif
 	},
 };
 
