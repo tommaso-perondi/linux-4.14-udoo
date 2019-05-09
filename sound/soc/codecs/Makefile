@@ -178,6 +178,7 @@ snd-soc-twl4030-objs := twl4030.o
 snd-soc-twl6040-objs := twl6040.o
 snd-soc-uda134x-objs := uda134x.o
 snd-soc-uda1380-objs := uda1380.o
+snd-soc-alc655-objs := alc655.o
 snd-soc-wl1273-objs := wl1273.o
 snd-soc-wm-adsp-objs := wm_adsp.o
 snd-soc-wm0010-objs := wm0010.o
@@ -239,6 +240,7 @@ snd-soc-zx-aud96p22-objs := zx_aud96p22.o
 snd-soc-rpmsg-wm8960-objs := rpmsg_wm8960.o
 snd-soc-rpmsg-cs42xx8-objs := rpmsg_cs42xx8.o
 snd-soc-rpmsg-ak4497-objs := rpmsg_ak4497.o
+snd-soc-ac97_standard-objs := ac97_standard.o
 
 # Amp
 snd-soc-dio2125-objs := dio2125.o
@@ -426,6 +428,7 @@ obj-$(CONFIG_SND_SOC_TWL4030)	+= snd-soc-twl4030.o
 obj-$(CONFIG_SND_SOC_TWL6040)	+= snd-soc-twl6040.o
 obj-$(CONFIG_SND_SOC_UDA134X)	+= snd-soc-uda134x.o
 obj-$(CONFIG_SND_SOC_UDA1380)	+= snd-soc-uda1380.o
+obj-$(CONFIG_SND_SOC_ALC655)	+= snd-soc-alc655.o
 obj-$(CONFIG_SND_SOC_WL1273)	+= snd-soc-wl1273.o
 obj-$(CONFIG_SND_SOC_WM0010)	+= snd-soc-wm0010.o
 obj-$(CONFIG_SND_SOC_WM1250_EV1) += snd-soc-wm1250-ev1.o
@@ -487,6 +490,7 @@ obj-$(CONFIG_SND_SOC_ZX_AUD96P22) += snd-soc-zx-aud96p22.o
 obj-$(CONFIG_SND_SOC_RPMSG_WM8960)	+= snd-soc-rpmsg-wm8960.o
 obj-$(CONFIG_SND_SOC_RPMSG_CS42XX8)	+= snd-soc-rpmsg-cs42xx8.o
 obj-$(CONFIG_SND_SOC_RPMSG_AK4497)	+= snd-soc-rpmsg-ak4497.o
+obj-$(CONFIG_SND_SOC_AC97_STANDARD)    += snd-soc-ac97_standard.o
 
 # Amp
 obj-$(CONFIG_SND_SOC_DIO2125)	+= snd-soc-dio2125.o

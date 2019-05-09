@@ -168,6 +168,7 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_TWL6040 if TWL6040_CORE
 	select SND_SOC_UDA134X
 	select SND_SOC_UDA1380 if I2C
+	select SND_SOC_ALC655 if SND_SOC_AC97_BUS
 	select SND_SOC_WL1273 if MFD_WL1273_CORE
 	select SND_SOC_WM0010 if SPI_MASTER
 	select SND_SOC_WM1250_EV1 if I2C
@@ -225,6 +226,7 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_RPMSG_WM8960
 	select SND_SOC_RPMSG_CS42XX8
 	select SND_SOC_RPMSG_AK4497
+	select SND_SOC_AC97_STANDARD if SND_SOC_AC97_BUS
         help
           Normally ASoC codec drivers are only built if a machine driver which
           uses them is also built since they are only usable with a machine
@@ -977,7 +979,10 @@ config SND_SOC_UDA134X
 
 config SND_SOC_UDA1380
         tristate
-	depends on I2C
+ 
+config SND_SOC_ALC655
+	select REGMAP_AC97
+	tristate
 
 config SND_SOC_WL1273
 	tristate
@@ -1182,6 +1187,10 @@ config SND_SOC_RPMSG_WM8960
 	tristate
 
 config SND_SOC_RPMSG_CS42XX8
+	tristate
+
+config SND_SOC_AC97_STANDARD
+	select REGMAP_AC97
 	tristate
 
 config SND_SOC_RPMSG_AK4497
