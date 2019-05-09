@@ -431,6 +431,7 @@
 	phy-mode           = "rmii";
 	phy-reset-gpios    = <&gpio1 3 0>;
 	phy-reset-duration = <20>;
+	phy-reset-post-delay = <100>;
 	fsl,num_tx_queues  = <3>;
 	fsl,num_rx_queues  = <3>;
 	fsl,magic-packet;
