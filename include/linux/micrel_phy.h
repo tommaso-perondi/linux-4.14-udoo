@@ -28,6 +28,7 @@
 /* same id: ks8001 Rev. A/B, and ks8721 Rev 3. */
 #define PHY_ID_KSZ8001		0x0022161A
 /* same id: KS8081, KS8091 */
+#define PHY_ID_KSZ8091		0x00221560
 #define PHY_ID_KSZ8081		0x00221560
 #define PHY_ID_KSZ8061		0x00221570
 #define PHY_ID_KSZ9031		0x00221620
