@@ -312,7 +312,7 @@ backlight {
 		#address-cells      = <1>;
 		#size-cells         = <0>;
 
-		compatible          = "spansion,s25fl208k";
+		compatible          = "spansion,s25fl208k","jedec,spi-nor";
 		spi-max-frequency   = <20000000>;
 		reg                 = <0>;
 
