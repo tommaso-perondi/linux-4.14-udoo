@@ -375,7 +375,7 @@
 
 			partition@0 {
 				label = "bootloader";
-				reg   = <0x00000000 0x00004000>;
+				reg   = <0x00000000 0x00020000>;
 			};
 		};
 	};
