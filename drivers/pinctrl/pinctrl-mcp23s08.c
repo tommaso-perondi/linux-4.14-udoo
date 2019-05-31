@@ -16,6 +16,8 @@
 #include <linux/pinctrl/pinctrl.h>
 #include <linux/pinctrl/pinconf.h>
 #include <linux/pinctrl/pinconf-generic.h>
+#include <linux/delay.h>
+#include <linux/of_gpio.h>
 
 /*
  * MCP types supported by driver
@@ -379,6 +381,7 @@ static const struct regmap_bus mcp23sxx_spi_regmap = {
  */
 struct mcp23s08_driver_data {
 	unsigned		ngpio;
+	int                 gpio_reset;
 	struct mcp23s08		*mcp[8];
 	struct mcp23s08		chip[];
 };
@@ -1071,6 +1074,25 @@ static void mcp23s08_i2c_exit(void) { }
 
 /*----------------------------------------------------------------------*/
 
+static void mcp23_reset (struct spi_device *spi, int gpio_reset) {
+	int err;
+
+	err	= devm_gpio_request_one (&spi->dev, gpio_reset,
+				    GPIOF_OUT_INIT_HIGH, "gpio-rst-mcp23");
+
+	if (err) {
+		dev_err (&spi->dev, "failed to get gpio-rst-mcp23: %d\n", err);
+		return;
+	}
+	msleep (2);
+	gpio_set_value (gpio_reset, 0);
+	msleep (3);
+	gpio_set_value (gpio_reset, 1);
+	msleep (1);
+
+}
+
+
 #ifdef CONFIG_SPI_MASTER
 
 static int mcp23s08_probe(struct spi_device *spi)
@@ -1080,6 +1102,7 @@ static int mcp23s08_probe(struct spi_device *spi)
 	int				chips = 0;
 	struct mcp23s08_driver_data	*data;
 	int				status, type;
+	int gpio_reset = 0;
 	unsigned			ngpio = 0;
 	const struct			of_device_id *match;
 
@@ -1091,6 +1114,15 @@ static int mcp23s08_probe(struct spi_device *spi)
 
 	pdata = dev_get_platdata(&spi->dev);
 	if (!pdata) {
+
+		gpio_reset = of_get_named_gpio(spi->dev.of_node,
+				"microchip,chip-reset", 0);
+		if ( !gpio_is_valid (gpio_reset) ) {
+			dev_err(&spi->dev, "invalid gpio reset\n");
+			return -ENODEV;
+		}
+		mcp23_reset (spi, gpio_reset);
+
 		pdata = &local_pdata;
 		pdata->base = -1;
 
@@ -1129,6 +1161,7 @@ static int mcp23s08_probe(struct spi_device *spi)
 
 	spi_set_drvdata(spi, data);
 
+	data->gpio_reset = gpio_reset;
 	for (addr = 0; addr < MCP_MAX_DEV_PER_CS; addr++) {
 		if (!(pdata->spi_present_mask & BIT(addr)))
 			continue;
