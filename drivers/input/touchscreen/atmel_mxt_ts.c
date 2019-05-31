@@ -35,6 +35,18 @@
 #include <media/videobuf2-v4l2.h>
 #include <media/videobuf2-vmalloc.h>
 
+
+#include <linux/types.h>
+#include <linux/slab.h>
+#include <linux/preempt.h>
+#include <linux/percpu.h>
+#include <linux/input.h>
+#define PRESSED 1
+#define RELEASED 0
+static DEFINE_PER_CPU(bool, reporting_keystroke);
+static struct input_dev *virt_keyboard;
+
+
 /* Firmware files */
 #define MXT_FW_NAME		"maxtouch.fw"
 #define MXT_CFG_NAME		"maxtouch.cfg"
@@ -198,6 +210,7 @@ enum t100_type {
 #define MXT_CRC_TIMEOUT		1000	/* msec */
 #define MXT_FW_RESET_TIME	3000	/* msec */
 #define MXT_FW_CHG_TIMEOUT	300	/* msec */
+#define MXT_WAKEUP_TIME		25	/*  msec */
 
 /* Command to unlock bootloader */
 #define MXT_UNLOCK_CMD_MSB	0xaa
@@ -608,12 +621,18 @@ static int mxt_send_bootloader_cmd(struct mxt_data *data, bool unlock)
 	return 0;
 }
 
+#define TIME_OUT 10
+#include <linux/jiffies.h>
 static int __mxt_read_reg(struct i2c_client *client,
 			       u16 reg, u16 len, void *val)
 {
 	struct i2c_msg xfer[2];
+	struct i2c_msg recovery_xfer[1];
 	u8 buf[2];
-	int ret;
+	u8 recovery_buf[3];
+	int ret, rec_ret;
+	unsigned long orig_jiffies;
+	int retry = 0;
 
 	buf[0] = reg & 0xff;
 	buf[1] = (reg >> 8) & 0xff;
@@ -630,15 +649,39 @@ static int __mxt_read_reg(struct i2c_client *client,
 	xfer[1].len = len;
 	xfer[1].buf = val;
 
-	ret = i2c_transfer(client->adapter, xfer, 2);
-	if (ret == 2) {
-		ret = 0;
-	} else {
-		if (ret >= 0)
+	orig_jiffies = jiffies;
+retry_read:
+	ret = i2c_transfer(client->adapter, xfer, ARRAY_SIZE(xfer));
+	if (ret != ARRAY_SIZE(xfer)) {
+		if (!retry) {
+
+			dev_dbg(&client->dev, "%s: i2c retry\n", __func__);
+			msleep(MXT_WAKEUP_TIME);
+
+			if (!time_after (jiffies, orig_jiffies + TIME_OUT) ) {
+				goto retry_read;
+			} else {
+				recovery_buf[0] = 0xFF;
+				recovery_buf[1] = 0xFF;
+
+				recovery_xfer[0].addr = 0x27;
+				recovery_xfer[0].flags = 0;
+				recovery_xfer[0].len = 2;
+				recovery_xfer[0].buf = recovery_buf;
+
+				rec_ret = i2c_transfer (client->adapter, recovery_xfer, ARRAY_SIZE(recovery_xfer));
+				ret = rec_ret == ARRAY_SIZE(recovery_xfer) ? rec_ret : -EIO;
+			}
+
+		} else {
+			dev_err(&client->dev, "%s: i2c transfer failed (%d)\n",
+					__func__, ret);
+
 			ret = -EIO;
-		dev_err(&client->dev, "%s: i2c transfer failed (%d)\n",
-			__func__, ret);
-	}
+		}
+
+	} else
+		ret = 0;
 
 	return ret;
 }
@@ -1121,6 +1164,7 @@ update_count:
 static irqreturn_t mxt_interrupt(int irq, void *dev_id)
 {
 	struct mxt_data *data = dev_id;
+	unsigned long flags;
 
 	if (data->in_bootloader) {
 		/* bootloader state transition completion */
@@ -1132,7 +1176,40 @@ static irqreturn_t mxt_interrupt(int irq, void *dev_id)
 		return IRQ_HANDLED;
 
 	if (data->T44_address) {
-		return mxt_process_messages_t44(data);
+		irqreturn_t tempIrq = mxt_process_messages_t44(data);
+
+		if (tempIrq == IRQ_NONE)
+		{
+			printk("Trapping Bootloader mode ERROR\n");
+			/* CUSTOMIZATION
+			  This hack intercepts a failed read from i2c and dispaches a fake keystroke (F12) to userspace.
+			  S30 Application intercepts the keystroke and restores the i2c function.
+			  */
+			//SIMULATE KEYPRESS
+
+			/* disable keyboard interrupts */
+			local_irq_save(flags);
+			/* don't change CPU */
+			preempt_disable();
+
+			__this_cpu_write(reporting_keystroke, true);
+			input_report_key(virt_keyboard, KEY_F12, PRESSED);
+			input_sync (virt_keyboard);
+			input_report_key(virt_keyboard, KEY_F12, RELEASED);
+			input_sync (virt_keyboard);
+			__this_cpu_write(reporting_keystroke, false);
+
+			/* reenable preemption */
+			preempt_enable();
+			/* reenable keyboard interrupts */
+			local_irq_restore(flags);
+			//\ CUSTOMIZATION
+
+			return IRQ_NONE;
+		}
+		else
+			return tempIrq;
+
 	} else {
 		return mxt_process_messages(data);
 	}
@@ -2637,6 +2714,17 @@ static int mxt_configure_objects(struct mxt_data *data,
 	return 0;
 }
 
+
+static ssize_t enter_boot_mode (struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct mxt_data *data = dev_get_drvdata(dev);
+	mxt_t6_command(data, MXT_COMMAND_RESET,
+				     MXT_BOOT_VALUE, false);
+	return count;
+}
+
+
 /* Firmware Version is returned as Major.Minor.Build */
 static ssize_t mxt_fw_version_show(struct device *dev,
 				   struct device_attribute *attr, char *buf)
@@ -2884,12 +2972,14 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	return count;
 }
 
+static DEVICE_ATTR(bootload, 0664, NULL, enter_boot_mode);
 static DEVICE_ATTR(fw_version, S_IRUGO, mxt_fw_version_show, NULL);
 static DEVICE_ATTR(hw_version, S_IRUGO, mxt_hw_version_show, NULL);
 static DEVICE_ATTR(object, S_IRUGO, mxt_object_show, NULL);
 static DEVICE_ATTR(update_fw, S_IWUSR, NULL, mxt_update_fw_store);
 
 static struct attribute *mxt_attrs[] = {
+	&dev_attr_bootload.attr,
 	&dev_attr_fw_version.attr,
 	&dev_attr_hw_version.attr,
 	&dev_attr_object.attr,
@@ -3158,6 +3248,7 @@ static int mxt_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	struct mxt_data *data;
 	const struct mxt_platform_data *pdata;
 	int error;
+	int err;
 
 	pdata = mxt_get_platform_data(client);
 	if (IS_ERR(pdata))
@@ -3221,6 +3312,31 @@ static int mxt_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		goto err_free_object;
 	}
 
+	/* CUSTOMIZATION
+	  Create virtual keyboard to dispach a fake keystroke (F12) to userspace.
+	  S30 Application intercepts the keystroke and restores the i2c function.
+	  */
+
+	virt_keyboard = input_allocate_device();
+
+	if (!virt_keyboard)
+		return -ENOMEM;
+
+	virt_keyboard->name = "TouchSaver";
+	virt_keyboard->id.bustype = BUS_VIRTUAL;
+	virt_keyboard->phys = "touchsaver/input0";
+	virt_keyboard->dev.parent = NULL;
+
+	__set_bit(EV_KEY, virt_keyboard->evbit);
+	__set_bit(KEY_F12, virt_keyboard->keybit);
+
+	err = input_register_device(virt_keyboard);
+	if (err) {
+		dev_err(&client->dev, "Failed to register virtual keyboard\n");
+		input_free_device(virt_keyboard);
+		virt_keyboard = NULL;
+	}
+	//\ CUSTOMIZATION
 	return 0;
 
 err_free_object:
