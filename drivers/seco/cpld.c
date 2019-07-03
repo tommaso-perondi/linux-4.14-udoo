@@ -142,7 +142,6 @@ int __cpld_init (struct device_node *dp, struct resource *resource) {
 	}
 
 	mutex_init (&cpld_d->bus_lock);
-	printk( KERN_INFO "davide %s %i\n", __func__, __LINE__ );
 
 	cpld_reg_read (REG_REVISION, &rev);
 	CPLD_INFO ("ver.:  %04x", rev);
@@ -246,7 +245,6 @@ static int cpld_probe (struct platform_device *pdev) {
 	int registred;
 
 	__cpld_init (dp, &res);
-	printk( KERN_INFO "davide %s %i\n", __func__, __LINE__ );
 
 	registred = clpd_client_register (dp, &pdev->dev);
 	if ( registred )
