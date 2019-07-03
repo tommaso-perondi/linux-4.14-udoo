@@ -1,0 +1,42 @@
+
+
+/dts-v1/;
+
+#include "imx6q.dtsi"
+#include "imx6qdl-seco_quadmo747_928.dtsi"
+#include "imx6qdl-seco_lvds_display.dtsi"
+
+/ {
+	model = "SECO i.MX6 Quad Quadmo747 (928) Board";
+	compatible = "fsl,imx6q-quadmo747_928", "fsl,imx6q";
+};
+
+&ldb {
+	lvds-channel@0 {
+		crtc = "ipu2-di0";
+	};
+
+	lvds-channel@1 {
+		crtc = "ipu2-di1";
+	};
+};
+
+&mxcfb1 {
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "okay";
+};
+
+//&mxcfb3 {
+//	status = "okay";
+//};
+//
+//&mxcfb4 {
+//	status = "okay";
+//};
+
+&sata {
+	status = "okay";
+};
