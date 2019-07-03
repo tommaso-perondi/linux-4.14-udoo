@@ -181,27 +181,44 @@
  * |                                 CLOCKS                                   |
  * |__________________________________________________________________________|
  */
-//	&clks {
-//		assigned-clocks =
-//			<&clks IMX6QDL_PLL4_BYPASS_SRC>,
-//			<&clks IMX6QDL_PLL4_BYPASS>,
-//
-//			<&clks IMX6QDL_CLK_EMI_SEL>,
-//			<&clks IMX6QDL_CLK_EMI_SLOW_SEL>,
-//
-//			<&clks IMX6QDL_CLK_PLL4_POST_DIV>,
-//			<&clks IMX6QDL_CLK_EMI_SLOW_PODF>;
-//
-//		assigned-clock-parents =
-//			<&clks IMX6QDL_CLK_LVDS2_IN>,
-//			<&clks IMX6QDL_PLL4_BYPASS_SRC>,
-//
-//			<&clks IMX6QDL_CLK_PLL2_PFD2_396M>,
-//			<&clks IMX6QDL_CLK_AXI>;
-//
-//		assigned-clock-rates = <0>, <0>, <0>, <0>, <24576000>, <8>;
-//	};
-//};
+// &clks {
+// 	assigned-clocks =
+
+	
+// 			<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
+
+
+// 			<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
+
+// 	assigned-clock-parents =
+
+	
+// 			<&clks IMX6QDL_CLK_PLL2_PFD2_396M>;
+
+// 	assigned-clock-rates =  <0>, <8>;
+// };
+
+
+
+&clks {
+	assigned-clocks =
+
+
+			
+			<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
+
+			
+			<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
+
+	assigned-clock-parents =
+
+			
+			<&clks IMX6QDL_CLK_AXI>;
+
+	assigned-clock-rates = <0>,  <8>;
+};
+
+
 
 /*  __________________________________________________________________________
  * |                                                                          |
@@ -608,9 +625,145 @@
 };
 
 
-&clks {
-	assigned-clocks = <&clks IMX6QDL_CLK_PLL4_POST_DIV>;
-	assigned-clock-rates = <24576000>;
+// &clks {
+// 	assigned-clocks = <&clks IMX6QDL_CLK_PLL4_POST_DIV>;
+// 	assigned-clock-rates = <24576000>;
+// };
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+
+ /*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                   BUS WEIM                               |
+ * |__________________________________________________________________________|
+ */
+
+&weim {
+	pinctrl-names  = "default";
+	pinctrl-0      = <&pinctrl_weim_nor &pinctrl_weim_cs &pinctrl_cgpio_exp>;
+	#address-cells = <2>;
+	#size-cells    = <1>;
+	ranges         = <0 0 0x08000000 0x08000000>;
+    status         = "okay";
+
+
+	cpld: cpld_seco@0,0 {
+		compatible         = "seco,cpld";
+		#address-cells     = <1>;
+		#size-cells        = <0>;
+		reg                = <0 0 0x20000>;
+		fsl,weim-cs-timing = <0x0191088F 0x00001000 0x14000000 0x00000008 0x03000000 0x00000000>;
+		fsl,weim-wcr       = <0x00000121>;
+        status             = "okay";
+
+
+		cgpio_exp: cgpio_exp@0 {
+			compatible       = "seco,cgpio_expander";
+			reg              = <0>;
+			type             = <0>;
+			gpio-controller;
+			#gpio-cells      = <2>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&gpio6>;
+			interrupts       = <14 1>;
+			status           = "disabled";
+		};
+
+
+		lpc_bridge: lpc_bridge@1 {
+			compatible       = "seco,lpc_bridge";
+			#address-cells   = <1>;
+			#size-cells      = <0>;
+			reg              = <1>;
+			type             = <1>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&gpio6>;
+			interrupts       = <14 2>;
+			status           = "okay";
+
+			superio_xr28v382: superio@0 {
+				compatible     = "MaxLinear,xr28v382";
+				reg            = <0>;
+				#address-cells = <1>;
+				#size-cells    = <0>;
+				status         = "okay";
+
+
+				uartA_xr28v382: uartA {
+					compatible       = "MaxLinear,xr28v382_A_16550a";
+					device_id        = <0>;
+					uart-clk         = <1843200>;
+					membase          = <0x03F8>;
+					reg-shift        = <0>;
+					fifo-size        = <16>;
+					interrupt-parent = <&lpc_bridge>;
+					interrupts       = <3 2>;
+					pl-size          = <0>;
+				};
+
+				uartB_xr28v382: uartB {
+					compatible       = "MaxLinear,xr28v382_B_16550a";
+					device_id        = <1>;
+					uart-clk         = <1843200>;
+					membase          = <0x02F8>;
+					reg-shift        = <0>;
+					fifo-size        = <16>;
+					interrupt-parent = <&lpc_bridge>;
+					interrupts       = <4 2>;
+					pl_size          = <0>;
+				};
+
+			};
+			
+
+			superio_w83627dhg: superio@1 {
+				compatible     = "nuvoton,w83627dhg";
+				reg            = <1>;
+				#address-cells = <1>;
+				#size-cells    = <0>;
+				status         = "disabled";
+
+				gpio_exp: gpio_exp {
+					compatible = "nuvoton,w83627dhg_gpio";
+					gpio_id    = <2>;
+				};
+
+				uartA_w83627dhg: uartA {
+					compatible       = "nuvoton,w83627dhg_A_16550a";
+					device_id        = <2>;
+					uart-clk         = <24000000>;
+					membase          = <0x03F8>;
+					reg-shift        = <0>;
+					fifo-size        = <16>;
+					interrupt-parent = <&lpc_bridge>;
+					interrupts       = <4 4>;
+					pl-size          = <30>;
+					rs485;
+					half-duplex;
+				};
+
+				uartB_w83627dhg: uartB {
+					compatible       = "nuvoton,w83627dhg_B_16550a";
+					device_id        = <3>;
+					uart-clk         = <24000000>;
+					membase          = <0x02F8>;
+					reg-shift        = <0>;
+					fifo-size        = <16>;
+					interrupt-parent = <&lpc_bridge>;
+					interrupts       = <3 4>;
+					pl_size          = <0>;
+				};
+			};
+			
+		};
+
+	};
+
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -626,7 +779,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
 
-	imx6qdl-uQ7_962 {
+	imx6qdl-quadmo747_928 {
 
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
@@ -899,8 +1052,7 @@
  * |______________________________ BUS WEIM __________________________________|
  */
 		pinctrl_cgpio_exp: cgpio_exp {
-			fsl,pins = <
-				MX6QDL_PAD_NANDF_CS1__GPIO6_IO14             0x1f071
+			fsl,pins = <		
 				MX6QDL_PAD_NANDF_ALE__GPIO6_IO08    0x1f071
 				MX6QDL_PAD_NANDF_CS3__GPIO6_IO16            0x1f071
 			>;
@@ -939,6 +1091,7 @@
 				MX6QDL_PAD_EIM_EB0__EIM_EB0_B                0xb0b1
 				MX6QDL_PAD_EIM_EB1__EIM_EB1_B                0xb0b1
 				MX6QDL_PAD_EIM_EB3__EIM_EB3_B                0xb0b1
+				MX6QDL_PAD_NANDF_CS1__GPIO6_IO14             0x1f071
 			>;
 		};
 

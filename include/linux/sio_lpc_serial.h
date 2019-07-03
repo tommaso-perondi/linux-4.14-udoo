@@ -47,17 +47,21 @@ struct serial_data {
 };
 
 
-#define LPC_UART_TYPE_W83627_A   0
-#define LPC_UART_TYPE_W83627_B   1
+#define LPC_UART_TYPE_W83627_A     0
+#define LPC_UART_TYPE_W83627_B     1
+#define LPC_UART_TYPE_XR28V382_A   0
+#define LPC_UART_TYPE_XR28V382_B   1
 
 
 #define LPC_PORT_TYPE_W83627     0
+#define LPC_PORT_TYPE_XR28V382   1
 
 
 extern int lpc_w83627_platform_serial_setup (struct platform_device *pdev, struct lpc_serial_port *info);
+extern int lpc_xr28v382_platform_serial_setup (struct platform_device *pdev, struct lpc_serial_port *info);
 
 extern int lpc_w83627_sys_serial_setup (struct platform_device *pdev, struct lpc_serial_port *info);
-
+extern int lpc_xr28v382_sys_serial_setup (struct platform_device *pdev, struct lpc_serial_port *info);
 
 
 

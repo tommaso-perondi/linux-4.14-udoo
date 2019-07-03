@@ -154,6 +154,7 @@ struct uart_port {
 #define UPIO_TSI		(SERIAL_IO_TSI)		/* Tsi108/109 type IO */
 #define UPIO_MEM32BE		(SERIAL_IO_MEM32BE)	/* 32b big endian */
 #define UPIO_MEM16		(SERIAL_IO_MEM16)	/* 16b little endian */
+#define UPIO_LPC                (SERIAL_IO_LPC)
 
 	/* quirks must be updated while holding port mutex */
 #define UPQ_NO_TXEN_TEST	BIT(0)

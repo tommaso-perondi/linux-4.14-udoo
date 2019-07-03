@@ -158,12 +158,13 @@ static irqreturn_t lpc_bridge_hanlder_irq (int irq, void *data) {
 	lpc_reg_read (LPC_REG_IRQ_MASK, &mask);
 	lpc_reg_read (LPC_REG_IRQ_CONF, &conf);
 	lpc_d->cache[LPC_REG_IRQ_BUFFER] = reg_interrupt;
-
+printk(KERN_INFO "davide %s  %i -- req %d\n", __func__, __LINE__, reg_interrupt);
 	for ( i = 0 ; i < NR_LPC_SLOTS ; i++ ) {
 		if ( BIT(i) & reg_interrupt ) {
 			child_irq = irq_find_mapping (lpc_d->irq_domain, i);
 			handle_nested_irq (child_irq);
 			count++;
+			printk(KERN_INFO "davide %s  %i  %d\n", __func__, __LINE__, i);
 		}
 	}
 

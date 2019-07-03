@@ -31,7 +31,7 @@ static struct cpld_data *cpld_d = NULL;
 
 
 void cpld_reg_read (unsigned int addr, uint16_t *data) {
-	*data = readw (WEIM_ADDR(REG_ADDR(addr)));
+	*data = __raw_readw (WEIM_ADDR(REG_ADDR(addr)));
 }
 
 
@@ -142,6 +142,7 @@ int __cpld_init (struct device_node *dp, struct resource *resource) {
 	}
 
 	mutex_init (&cpld_d->bus_lock);
+	printk( KERN_INFO "davide %s %i\n", __func__, __LINE__ );
 
 	cpld_reg_read (REG_REVISION, &rev);
 	CPLD_INFO ("ver.:  %04x", rev);
@@ -243,7 +244,10 @@ static int cpld_probe (struct platform_device *pdev) {
 	struct resource res;
 	int error = 0;
 	int registred;
+
 	__cpld_init (dp, &res);
+	printk( KERN_INFO "davide %s %i\n", __func__, __LINE__ );
+
 	registred = clpd_client_register (dp, &pdev->dev);
 	if ( registred )
 		error = sysfs_create_group(&pdev->dev.kobj, &cpld_attr_group);

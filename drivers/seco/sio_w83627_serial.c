@@ -193,7 +193,6 @@ static ssize_t sys_w83627_store_uart_regs (struct device *dev, struct device_att
 
 	reg = (uint8_t)simple_strtoul (start, &start, 16);
 
-	printk (KERN_INFO "davide reg %X\n", reg);
 	if ( reg < 0 || reg > 7 ) {
 		return -EINVAL;
 	}
@@ -207,7 +206,6 @@ static ssize_t sys_w83627_store_uart_regs (struct device *dev, struct device_att
 
 	value = (uint8_t)val;
 
-	printk (KERN_INFO "davide scrivo %X in %X\n", value, reg);
 	w83627_serial_out (&info->port, reg, value);
 
 	return count;

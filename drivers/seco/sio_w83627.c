@@ -132,12 +132,12 @@ static inline void superio_outb (uint8_t addr, uint8_t value) {
 }
 
 
-static inline void superio_inb (uint16_t addr, uint8_t *data) {
+static inline void superio_inb (uint8_t addr, uint8_t *data) {
 	uint16_t val16 = 0;
 	uint16_t addr16 = (uint16_t)addr;
 	lpc_writew (REG_EFER, addr16);
 	lpc_readw (REG_EFDR, &val16);
-	*data = (uint16_t)(val16);
+	*data = (uint8_t)(val16);
 }
 
 
@@ -368,9 +368,11 @@ static int superio_wb_probe (struct platform_device *pdev) {
 	int err = 0;
 	uint16_t rev = 0;
 
+	/*  device software restetting  */
 	superio_sw_reset ();
 	udelay (10);
 
+	/*  validate chip through device and vendor ID  */
 	superio_enter_ext_mode ();
 
 	rev = getChipID ();
@@ -410,6 +412,10 @@ err_rev_inval:
 
 
 static int superio_wb_remove (struct platform_device *pdev) {
+
+	platform_device_unregister (pdev); 
+	kfree (pdev);
+
 	return 0;
 }
 

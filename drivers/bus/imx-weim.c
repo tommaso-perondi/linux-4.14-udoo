@@ -15,6 +15,8 @@
 #include <linux/mfd/syscon/imx6q-iomuxc-gpr.h>
 #include <linux/regmap.h>
 
+#define WCR_REG_OFFSET   0x90
+
 struct imx_weim_devtype {
 	unsigned int	cs_count;
 	unsigned int	cs_regs_count;
@@ -112,7 +114,7 @@ err:
 static int __init weim_timing_setup(struct device_node *np, void __iomem *base,
 				    const struct imx_weim_devtype *devtype)
 {
-	u32 cs_idx, value[devtype->cs_regs_count];
+	u32 cs_idx, value[devtype->cs_regs_count], wcr;
 	int i, ret;
 
 	/* get the CS index from this child node's "reg" property. */
@@ -131,6 +133,13 @@ static int __init weim_timing_setup(struct device_node *np, void __iomem *base,
 	/* set the timing for WEIM */
 	for (i = 0; i < devtype->cs_regs_count; i++)
 		writel(value[i], base + cs_idx * devtype->cs_stride + i * 4);
+
+
+	ret = of_property_read_u32 (np, "fsl,weim-wcr", &wcr);
+	if ( ret )
+		return ret;
+
+	writel(wcr, base + WCR_REG_OFFSET);
 
 	return 0;
 }

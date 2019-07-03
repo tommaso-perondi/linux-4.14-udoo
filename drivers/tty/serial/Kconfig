@@ -1707,6 +1707,15 @@ config SERIAL_OWL_CONSOLE
 	  Say 'Y' here if you wish to use Actions Semiconductor S500/S900 UART
 	  as the system console.
 
+
+config SERIAL_LPC_SIO
+	tristate "SuperIO Serial port via LPC bus"
+	depends on OF
+	depends on SECO_CPLD_FW
+	depends on SERIAL_8250
+	help
+	  The QuadMo747 supports the LPC Bridge to communicate with
+		 a superIO which has UART controller.
 endmenu
 
 config SERIAL_MCTRL_GPIO
