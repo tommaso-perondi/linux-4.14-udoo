@@ -1,0 +1,43 @@
+/dts-v1/;
+
+#include "imx6sx-seco_SBC_B08.dtsi"
+
+
+/ {
+	model = "SECO i.MX6 Solo X SBC (B08) Board";
+	compatible = "fsl,imx6sx-SBC_B08", "fsl,imx6sx";
+};
+
+
+
+//  &ldb {  
+// 	lvds-channel@0 {
+// 		crtc = "ipu1-di0";
+// 	};
+
+// 	lvds-channel@1 {
+// 		crtc = "ipu1-di1";
+// 	};
+// };
+
+
+// &mxcfb1 {
+// 	status = "okay";
+// };
+
+// &mxcfb2 {
+// 	status = "okay";
+// };
+
+// &mxcfb3 {
+// 	status = "okay";
+// };
+
+// &mxcfb4 {
+// 	status = "okay";
+// };
+
+// &sata {
+// 	status = "okay";
+// };
+
