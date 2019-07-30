@@ -30,19 +30,9 @@
 		#address-cells   = <1>;
 		#size-cells      = <0>;
 
-		reg_usb_otg_vbus: regulator@0 {
+		reg_usb_h1_vbus: regulator@0 {
 			compatible              = "regulator-fixed";
 			reg                     = <0>;
-			regulator-name          = "usb_otg_vbus";
-			regulator-min-microvolt = <5000000>;
-			regulator-max-microvolt = <5000000>;
-			gpio                    = <&gpio3 22 0>;
-			enable-active-high;
-		};
-
-		reg_usb_h1_vbus: regulator@1 {
-			compatible              = "regulator-fixed";
-			reg                     = <1>;
 			regulator-name          = "usb_h1_vbus";
 			pinctrl-0               = <&pinctrl_usb_reg>;
 			regulator-min-microvolt = <5000000>;
@@ -52,9 +42,9 @@
 			startup-delay-us        = <10>; /* USB2514 requires a POR of 1 us minimum */
 		};
 
-		reg_panel_on: regulator@2 {
+		reg_panel_on: regulator@1 {
 			compatible              = "regulator-fixed";
-			reg                     = <2>;
+			reg                     = <1>;
 			regulator-name          = "reg_panel_on";
 			regulator-min-microvolt = <3000000>;
 			regulator-max-microvolt = <3000000>;
@@ -116,7 +106,7 @@
 	};
 
 
-backlight {
+	backlight {
 		compatible               = "pwm-backlight";
 		pwms                     = <&pwm1 0 5000000>;
 		brightness-levels        = <0  4   8   12  16  20  24  28  32  36
@@ -131,12 +121,6 @@ backlight {
 		enable-gpios             = <&gpio1 4 0>;
 		status                   = "okay";
 	};	
-
-
-	v4l2_out {
-		compatible = "fsl,mxc_v4l2_output";
-		status     = "okay";
-	};
 };
 
 /*  __________________________________________________________________________
@@ -235,6 +219,12 @@ backlight {
 		compatible  = "fsl,imx6-hdmi-i2c";
 		reg         = <0x50>;
 	};
+
+	at24@57 {
+		compatible = "at24,24aa025";
+		pagesize   = <256>;
+		reg        = <0x57>;
+	};
 };
 
 
@@ -260,20 +250,21 @@ backlight {
 	};
 
 
-//	st1232-ts@55 {
-//		compatible       = "sitronix,st1232";
-//		reg              = <0x55>;
-//
-//		pinctrl-names    = "default";
-//		pinctrl-0        = <&pinctrl_st1232>;
-//		interrupt-parent = <&gpio1>;
-//		interrupts       = <13 IRQ_TYPE_LEVEL_LOW>;
-//		gpios            = <&gpio1 15 GPIO_ACTIVE_LOW>;
-//	};
+	st1232-ts@55 {
+		compatible       = "sitronix,st1232";
+		reg              = <0x55>;
+
+		pinctrl-names    = "default";
+		pinctrl-0        = <&pinctrl_st1232>;
+		interrupt-parent = <&gpio1>;
+		interrupts       = <13 IRQ_TYPE_LEVEL_LOW>;
+		gpios            = <&gpio1 15 GPIO_ACTIVE_LOW>;
+		status           = "okay";
+	};
 
 
 	gt928@5d {
-			compatible       = "goodix,gt928";
+		compatible       = "goodix,gt928";
 		reg              = <0x5d>;
 
 		pinctrl-names    = "default";
@@ -289,6 +280,7 @@ backlight {
 
 		ts-max-finger    = <1>;
 		sensor-id        = <0>;
+		status           = "disabled";
 	};
 };
 /*  __________________________________________________________________________
@@ -433,10 +425,13 @@ backlight {
 
 
 &usbotg {
-	vbus-supply           = <&reg_usb_otg_vbus>;
 	pinctrl-names         = "default";
 	pinctrl-0             = <&pinctrl_usbotg>;
+	dr_mode		          = "peripheral";
 	disable-over-current;
+	srp-disable;
+	hnp-disable;
+	adp-disable;
 	status                = "okay";
 };
 /*  __________________________________________________________________________
@@ -458,12 +453,10 @@ backlight {
 		status      = "okay";
 	};
 
-	v4l2_cap_1 {
-		compatible  = "fsl,imx6q-v4l2-capture";
-		ipu_id      = <0>;
-		csi_id      = <1>;
-		mclk_source = <0>;
-		status      = "okay";
+
+	v4l2_out {
+		compatible = "fsl,mxc_v4l2_output";
+		status     = "okay";
 	};
 };
 
@@ -592,6 +585,10 @@ backlight {
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02                0x1f071
 
 //				MX6QDL_PAD_NANDF_CS2__CCM_CLKO2              0x130b0
+
+				MX6QDL_PAD_SD2_CMD__GPIO1_IO11               0x1f071	// FAN_GPIO
+				MX6QDL_PAD_GPIO_18__GPIO7_IO13               0x1f071    // FAN_EN
+
 			>;
 		};
 
