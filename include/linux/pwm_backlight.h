@@ -22,6 +22,7 @@ struct platform_pwm_backlight_data {
 	void (*exit)(struct device *dev);
 	int (*check_fb)(struct device *dev, struct fb_info *info);
 	char fb_id[16];
+	unsigned int enable_delay;
 };
 
 #endif

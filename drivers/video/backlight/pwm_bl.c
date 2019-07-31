@@ -23,6 +23,8 @@
 #include <linux/pwm_backlight.h>
 #include <linux/regulator/consumer.h>
 #include <linux/slab.h>
+#include <linux/workqueue.h>
+
 
 struct pwm_bl_data {
 	struct pwm_device	*pwm;
@@ -42,7 +44,19 @@ struct pwm_bl_data {
 	int			(*check_fb)(struct device *, struct fb_info *);
 	void			(*exit)(struct device *);
 	char			fb_id[16];
+
+	struct delayed_work	pwmg_oneshot_work;
+	struct workqueue_struct *pwmg_workq;
+	unsigned int    enable_delay;
 };
+
+#define PWMG_WORK_POLLING_JIFFIES	                   msecs_to_jiffies(pb->enable_delay)
+
+static void pwmg_oneshot_work_handler (struct work_struct *work) {
+	struct pwm_bl_data *pb = container_of(work, struct pwm_bl_data, pwmg_oneshot_work.work);
+	gpiod_set_value_cansleep(pb->enable_gpio, 1);
+	return;	
+}
 
 static void pwm_backlight_power_on(struct pwm_bl_data *pb, int brightness)
 {
@@ -56,7 +70,8 @@ static void pwm_backlight_power_on(struct pwm_bl_data *pb, int brightness)
 		dev_err(pb->dev, "failed to enable power supply\n");
 
 	if (pb->enable_gpio)
-		gpiod_set_value_cansleep(pb->enable_gpio, 1);
+		if (pb->pwmg_workq)
+			queue_delayed_work(pb->pwmg_workq, &pb->pwmg_oneshot_work, PWMG_WORK_POLLING_JIFFIES);
 
 	pwm_enable(pb->pwm);
 	pb->enabled = true;
@@ -186,6 +201,10 @@ static int pwm_backlight_parse_dt(struct device *dev,
 		if (ret < 0)
 			return ret;
 
+		ret = of_property_read_u32(node, "enable-delay", &data->enable_delay);
+		if ( data->enable_delay < 0 )
+			data->enable_delay = 0;
+
 		data->dft_brightness = value;
 		data->max_brightness--;
 	}
@@ -302,6 +321,15 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 		goto err_alloc;
 	}
 
+	pb->enable_delay = data->enable_delay;
+
+	pb->pwmg_workq = create_singlethread_workqueue("pwmg_oneshot");
+    if (pb->pwmg_workq == NULL) {
+		ret = -ENOMEM;
+    	goto err_alloc;
+	}
+	INIT_DELAYED_WORK(&pb->pwmg_oneshot_work, pwmg_oneshot_work_handler );
+
 	/*
 	 * Compatibility fallback for drivers still using the integer GPIO
 	 * platform data. Must go away soon.
@@ -328,7 +356,7 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 	 */
 	if (pb->enable_gpio &&
 	    gpiod_get_direction(pb->enable_gpio) != 0)
-		gpiod_direction_output(pb->enable_gpio, 1);
+		gpiod_direction_output(pb->enable_gpio, 0);
 
 	pb->power_supply = devm_regulator_get(&pdev->dev, "power");
 	if (IS_ERR(pb->power_supply)) {
