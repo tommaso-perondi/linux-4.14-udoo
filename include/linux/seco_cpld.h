@@ -4,8 +4,8 @@
 #include <linux/of.h>
 #include <linux/device.h>
 
-#define NREG                     8
-#define CPLD_OFFSET_BASE 	     0xF000
+#define NREG                     11
+#define CPLD_OFFSET_BASE 	 0xF000
 
 #define CPLD_REG_0               (uint8_t)0x0
 #define CPLD_REG_1               (uint8_t)0x1

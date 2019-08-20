@@ -213,6 +213,7 @@ static int clpd_client_register (struct device_node *dp, struct device *parent_d
 	struct device_node *child;
 	const char *en_code = "okay";
 
+#if 0	// use direct dts status selection
 	for_each_child_of_node (dp, child) {
 		ret = of_property_read_u32 (child, "type", (u32 *)&type);
 		if ( ret == 0 ) {
@@ -226,6 +227,7 @@ static int clpd_client_register (struct device_node *dp, struct device *parent_d
 			CPLD_ERR ("failed to create device");
 		}
 	}
+#endif
 
 	ret = of_platform_populate (dp,  NULL, NULL, parent_dev);
 	if ( ret ) {
