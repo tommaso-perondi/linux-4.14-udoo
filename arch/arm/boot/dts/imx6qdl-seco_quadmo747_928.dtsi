@@ -152,26 +152,6 @@
 		enable-gpios             = <&gpio1 4 0>;
 		status                   = "okay";
 	};
-
-
-
-/*  __________________________________________________________________________
- * |                                                                          |
- * |                                    PWM                                   |
- * |__________________________________________________________________________|
- */
-	pwm-generic {
-                compatible      = "pwm-generic";
-                pwms            = <&pwm2 0 500000000>;
-                pinctrl-0       = <&pinctrl_pwm2>;
-                max-duty        = <255>;
-                dft-duty        = <128>;
-                pwm-period-ns   = <5000000>;
-                period-ns-min   = <150>;
-                period-ns-max   = <50000000>;
-                pwm-id          = <1>;
-                enable          = <0>;
-	};
 };
 
 
@@ -600,14 +580,37 @@
 };
 
 
-// &clks {
-// 	assigned-clocks = <&clks IMX6QDL_CLK_PLL4_POST_DIV>;
-// 	assigned-clock-rates = <24576000>;
-// };
+/ {
+	buzzer {
+		compatible      = "pwm-generic";
+		pwms            = <&pwm2 0 500000000>;
+		max-duty        = <255>;
+		dft-duty        = <128>;
+		pwm-period-ns   = <370000>;
+		period-ns-min   = <150>;
+		period-ns-max   = <50000000>;
+		pwm-id          = <2>;
+		enable          = <0>;
+	};
+};
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
 
+/ {
+	fan: fan {
+		compatible      = "pwm-generic";
+		pwms            = <&cpwm 0 500000>;
+		max-duty        = <255>;
+		dft-duty        = <128>;
+		pwm-period-ns   = <500000>;
+		period-ns-min   = <100000>;
+		period-ns-max   = <500000>;
+		pwm-id          = <3>;
+		enable          = <0>;
+		status          = "disabled";
+	};
+};
 
 
  /*  __________________________________________________________________________
@@ -735,6 +738,14 @@
 				};
 			};
 			
+		};
+
+		cpwm: cpwm@2 {
+			compatible       = "seco,cpwm";
+			#pwm-cells       = <2>;
+			reg              = <2>;
+			type             = <2>;
+			status           = "disabled";
 		};
 
 	};
