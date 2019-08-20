@@ -57,17 +57,17 @@
 			compatible              = "regulator-fixed";
 			reg                     = <2>;
 			regulator-name          = "reg_panel_on";
-			regulator-min-microvolt = <3000000>;
-			regulator-max-microvolt = <3000000>;
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
 			gpio                    = <&gpio1 2 0>;
 			enable-active-high;
 			regulator-boot-on;
 			regulator-always-on;
 		};
 
-		reg_2p5v_sgtl5000: regulator@4 {
+		reg_2p5v_sgtl5000: regulator@3 {
 			compatible              = "regulator-fixed";
-			reg                     = <2>;
+			reg                     = <3>;
 			regulator-name          = "2P5V_sgtl5000";
 			regulator-min-microvolt = <2500000>;
 			regulator-max-microvolt = <2500000>;
@@ -75,9 +75,9 @@
 			status                  = "disabled";
 		};
 
-		reg_3p3v_sgtl5000: regulator@5 {
+		reg_3p3v_sgtl5000: regulator@4 {
 			compatible              = "regulator-fixed";
-			reg                     = <3>;
+			reg                     = <4>;
 			regulator-name          = "3P3V_sgtl5000";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
@@ -181,39 +181,13 @@
  * |                                 CLOCKS                                   |
  * |__________________________________________________________________________|
  */
-// &clks {
-// 	assigned-clocks =
-
-	
-// 			<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
-
-
-// 			<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
-
-// 	assigned-clock-parents =
-
-	
-// 			<&clks IMX6QDL_CLK_PLL2_PFD2_396M>;
-
-// 	assigned-clock-rates =  <0>, <8>;
-// };
-
-
-
 &clks {
 	assigned-clocks =
-
-
-			
-			<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
-
-			
-			<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
+		<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
+		<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
 
 	assigned-clock-parents =
-
-			
-			<&clks IMX6QDL_CLK_AXI>;
+		<&clks IMX6QDL_CLK_AXI>;
 
 	assigned-clock-rates = <0>,  <8>;
 };
@@ -248,7 +222,7 @@
 	status        = "okay";
 };
 
-/*  General Pourpose  */
+/*  General Pourpose - shared with CAN1  */
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_uart4>;
@@ -268,6 +242,7 @@
 
 
 /*  __________________________________________________________________________
+ * |                                                                          |
  * |                            I2C INTERFACE/DEVICE                          |
  * |__________________________________________________________________________|
  */
@@ -657,7 +632,7 @@
 		reg                = <0 0 0x20000>;
 		fsl,weim-cs-timing = <0x0191088F 0x00001000 0x14000000 0x00000008 0x03000000 0x00000000>;
 		fsl,weim-wcr       = <0x00000121>;
-        status             = "okay";
+        status             = "disabled";
 
 
 		cgpio_exp: cgpio_exp@0 {
@@ -684,14 +659,14 @@
 			#interrupt-cells = <2>;
 			interrupt-parent = <&gpio6>;
 			interrupts       = <14 2>;
-			status           = "okay";
+			status           = "disabled";
 
 			superio_xr28v382: superio@0 {
 				compatible     = "MaxLinear,xr28v382";
 				reg            = <0>;
 				#address-cells = <1>;
 				#size-cells    = <0>;
-				status         = "okay";
+				status         = "disabled";
 
 
 				uartA_xr28v382: uartA {
@@ -793,7 +768,7 @@
 				MX6QDL_PAD_SD4_DAT6__GPIO2_IO14              0x1f071
 				/*  PWR EMBEDDED CONTROLLER  */
 				MX6QDL_PAD_SD4_DAT5__GPIO2_IO13              0x1f071
-				/*  CAN SELECTOR  */
+				/*   UART4 - FLEXCAN MUX SELECTOR  */
 				MX6QDL_PAD_EIM_D20__GPIO3_IO20               0x1f071
 			>;
 		};
@@ -862,6 +837,7 @@
 				MX6QDL_PAD_EIM_D16__ECSPI1_SCLK              0x100b1
 				/*  CS SPI 1  */
 				MX6QDL_PAD_EIM_D19__GPIO3_IO19               0x80000000
+				MX6QDL_PAD_EIM_A21__GPIO2_IO17               0x80000000
 
 			>;
 		};
@@ -1005,7 +981,7 @@
 		pinctrl_st1232: st1232grp {
 			fsl,pins = <
 				MX6QDL_PAD_SD2_CMD__GPIO1_IO11              0x80000000         // Touch Reset
-				MX6QDL_PAD_DISP0_DAT9__GPIO4_IO30           0x80000000         // Touch Interrupt
+		//		MX6QDL_PAD_DISP0_DAT9__GPIO4_IO30           0x80000000         // Touch Interrupt
 			>;
 		};
 
