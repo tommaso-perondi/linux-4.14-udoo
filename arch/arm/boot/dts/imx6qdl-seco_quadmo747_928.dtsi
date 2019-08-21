@@ -72,7 +72,7 @@
 			regulator-min-microvolt = <2500000>;
 			regulator-max-microvolt = <2500000>;
 			regulator-always-on;
-			status                  = "disabled";
+			status                  = "okay";
 		};
 
 		reg_3p3v_sgtl5000: regulator@4 {
@@ -82,7 +82,7 @@
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 			regulator-always-on;
-			status                  = "disabled";
+			status                  = "okay";
 		};
 
 	};
@@ -164,12 +164,13 @@
 &clks {
 	assigned-clocks =
 		<&clks IMX6QDL_CLK_EIM_SLOW_SEL>,
-		<&clks IMX6QDL_CLK_EIM_SLOW_PODF>;
+		<&clks IMX6QDL_CLK_EIM_SLOW_PODF>,
+		<&clks IMX6QDL_CLK_PLL4_POST_DIV>;
 
 	assigned-clock-parents =
 		<&clks IMX6QDL_CLK_AXI>;
 
-	assigned-clock-rates = <0>,  <8>;
+	assigned-clock-rates = <0>,  <8>, <24576000>;
 };
 
 
@@ -298,7 +299,7 @@
 		clocks       = <&clks IMX6QDL_CLK_CKO>;
 		VDDA-supply  = <&reg_2p5v_sgtl5000>;
 		VDDIO-supply = <&reg_3p3v_sgtl5000>;
-		status       = "disabled";
+		status       = "okay";
 	};
 
 //	st1232-ts@55 {
@@ -538,45 +539,39 @@
 /*  __________________________________________________________________________
  * |____________________________ AUDIO VT1613 ________________________________|
  */
-/ {
-	codec_ac97_standard: codec_ac97_standard {
-		compatible = "seco,ac97_standard";
-		model	   = "ac97-standard-codec";
-		status     = "okay";
-	};
+/*  __________________________________________________________________________
+ * |___________________________ AUDIO SGTL5000 _______________________________|
+ */
 
-	sound_ac97_standard: sound_ac97_standard {
-		compatible     = "fsl,imx-ac97_standard-audio";
-		model          = "imx-ac97-ac97_standard";
-		cpu-dai        = <&ssi1>;
-		audio-codec    = <&codec_ac97_standard>;
-		ssi-controller = <&ssi1>;
-		asrc-controller = <&asrc>;
-		mux-int-port   = <1>;
-		mux-ext-port   = <6>;
-		codec-master;
-		status         = "okay";
-	};
-
+ / {
+    sound_sgtl5000: sound_sgtl5000 {
+        compatible     = "fsl,imx6q-seco-sgtl5000",
+                         "fsl,imx-audio-sgtl5000";
+        model          = "fsl,imx6q-seco-sgtl5000";
+        cpu-dai        = <&ssi1>;
+        ssi-controller = <&ssi1>;
+        audio-codec    = <&codec_sgtl5000>;
+        audio-routing  = "MIC_IN", "Mic Jack",
+                         "Mic Jack", "Mic Bias",
+                         "Headphone Jack", "HP_OUT";
+        mux-int-port   = <1>;
+        mux-ext-port   = <6>;
+        status         = "okay";
+    };
 };
 
 
 &ssi1 {
-	fsl,mode      = "ac97-slave";
-	pinctrl-names = "default", "ac97-running", "ac97-reset", "ac97-warm-reset";
-	pinctrl-0     = <&ac97link_running>;
-	pinctrl-1     = <&ac97link_running>;
-	pinctrl-2     = <&ac97link_reset>;
-	pinctrl-3     = <&ac97link_warm_reset>;
-	/* sync, sdata (output), reset */
-	ac97-gpios    = <&gpio4 19 0 &gpio4 18 0 &gpio4 23 0>;
-	//ac97-gpios    = <&gpio4 19 0 &gpio4 18 0 &gpio2 31 0>;
+    fsl,mode       = "i2s-slave";
+    status         = "okay";
 	cell-index    = <0>;
-	status        = "okay";
 };
 
+
 &audmux {
-	status = "okay";
+	status        = "okay";
+	pinctrl-names = "default";
+	pinctrl-0     = <&pinctrl_audmux>;
 };
 
 
