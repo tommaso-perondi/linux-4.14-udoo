@@ -56,8 +56,8 @@
 			compatible              = "regulator-fixed";
 			reg                     = <2>;
 			regulator-name          = "reg_panel_on";
-			regulator-min-microvolt = <3000000>;
-			regulator-max-microvolt = <3000000>;
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
 			gpio                    = <&gpio1 2 0>;
 			enable-active-high;
 			regulator-boot-on;
@@ -66,10 +66,10 @@
 
 		reg_sd4_vmmc: regulator@3 {
 			compatible              = "regulator-fixed";
-			reg                     = <2>;
+			reg                     = <3>;
 			regulator-name          = "sdcard_on";
-			regulator-min-microvolt = <3000000>;
-			regulator-max-microvolt = <3000000>;
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
 			gpio                    = <&gpio5 20 0>;
 			enable-active-high;
 			startup-delay-us        = <200000>;
@@ -214,7 +214,7 @@
  * |                                    CAN                                   |
  * |__________________________________________________________________________|
  */
-/*  Shared with UART4  */
+/*  Shared with UART1  */
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_flexcan1>;
@@ -233,7 +233,7 @@
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_uart1>;
-	status        = "disable";
+	status        = "disabled";
 };
 
 
