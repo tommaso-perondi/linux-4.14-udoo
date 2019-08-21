@@ -1241,6 +1241,9 @@ dtb-$(CONFIG_ARCH_ASPEED) += aspeed-bmc-opp-palmetto.dtb \
 	aspeed-ast2500-evb.dtb
 endif
 
+dts-dirs        += overlays  
+subdir-y	:= $(dts-dirs)
+DTC_FLAGS ?= -@ -H epapr
 dtstree		:= $(srctree)/$(src)
 dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(wildcard $(dtstree)/*.dts))
 
