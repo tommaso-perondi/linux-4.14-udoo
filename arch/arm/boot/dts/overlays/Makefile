@@ -1,0 +1,21 @@
+DTC_FLAGS ?= -@ -H epapr
+
+
+dtbo-$(CONFIG_SOC_IMX6Q) += \
+	imx6qdl-seco_uq7_962_uart4.dtbo \
+	imx6qdl-seco_uq7_962_ac97.dtbo \
+	imx6qdl-seco_uQ7_J_A75_ac97.dtbo \
+	imx6qdl-seco_uQ7_J_A75_uart1.dtbo \
+	imx6qdl-seco_quadmo747_928_ac97.dtbo \
+	imx6qdl-seco_quadmo747_928_cpld_gpio_pwm.dtbo \
+	imx6qdl-seco_quadmo747_928_cpld_maxlinear.dtbo \
+	imx6qdl-seco_quadmo747_928_cpld_nuvoton.dtbo \
+	imx6qdl-seco_quadmo747_928_uart4.dtbo
+
+
+targets += dtbs dtbs_install
+targets += $(dtbo-y)
+
+always		:= $(dtbo-y)
+clean-files	:= *.dtbo
+
