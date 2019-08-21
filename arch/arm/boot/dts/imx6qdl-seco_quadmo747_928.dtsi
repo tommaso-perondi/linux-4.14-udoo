@@ -352,7 +352,7 @@
 	rtc: pcf2123@1 {
 		compatible        = "nxp,rtc-pcf2123";
 		reg               = <1>;
-		spi-max-frequency = <2450000>;
+		spi-max-frequency = <1000000>;
 		spi-cs-high;
     };
 
