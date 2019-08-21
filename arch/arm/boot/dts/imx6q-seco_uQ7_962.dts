@@ -3,7 +3,7 @@
 /dts-v1/;
 
 #include "imx6q.dtsi"
-#include "imx6qdl-seco_uq7_962.dtsi"
+#include "imx6qdl-seco_uQ7_962.dtsi"
 #include "imx6qdl-seco_lvds_display.dtsi"
 
 / {
