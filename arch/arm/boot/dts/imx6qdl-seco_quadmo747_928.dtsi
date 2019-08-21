@@ -85,6 +85,31 @@
 			status                  = "okay";
 		};
 
+
+		/* select for mux between uart4 and flexcan (default is flexcan) */
+		reg_uart_switch: regulator@5 {
+			compatible              = "regulator-fixed";
+			reg                     = <5>;
+			regulator-name          = "uart4_enable";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio                    = <&gpio3 20 0>;
+			regulator-always-on;
+			enable-active-high;
+			status                  = "disabled";
+		};
+
+		reg_flex_can_switch: regulator@6 {
+			compatible              = "regulator-fixed";
+			reg                     = <6>;
+			regulator-name          = "flexcan_enable";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio                    = <&gpio3 20 0>;
+			regulator-always-on;
+			status                  = "okay";
+		};
+
 	};
 
 
@@ -184,7 +209,7 @@
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_flexcan1>;
-	status        = "disabled";
+	status        = "okay";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|

@@ -96,6 +96,31 @@
 			status                  = "okay";
 		};
 
+
+		/* select for mux between uart4 and flexcan (default is flexcan) */
+		reg_uart_switch: regulator@6 {
+			compatible              = "regulator-fixed";
+			reg                     = <6>;
+			regulator-name          = "uart4_enable";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio                    = <&gpio3 20 0>;
+			regulator-always-on;
+			enable-active-high;
+			status                  = "disabled";
+		};
+
+		reg_flex_can_switch: regulator@7 {
+			compatible              = "regulator-fixed";
+			reg                     = <7>;
+			regulator-name          = "flexcan_enable";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio                    = <&gpio3 20 0>;
+			regulator-always-on;
+			status                  = "okay";
+		};
+
 	};
 
 
@@ -642,6 +667,8 @@
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07              0x1f071
 				/*  PWR EMBEDDED CONTROLLER  */
 				MX6QDL_PAD_NANDF_D4__GPIO2_IO04              0x1f071
+				/*   UART4 - FLEXCAN MUX SELECTOR  */
+				MX6QDL_PAD_EIM_D20__GPIO3_IO20               0x1f071
 			>;
 		};
 
