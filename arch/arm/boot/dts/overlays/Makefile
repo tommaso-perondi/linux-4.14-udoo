@@ -10,7 +10,10 @@ dtbo-$(CONFIG_SOC_IMX6Q) += \
 	imx6qdl-seco_quadmo747_928_cpld_gpio_pwm.dtbo \
 	imx6qdl-seco_quadmo747_928_cpld_maxlinear.dtbo \
 	imx6qdl-seco_quadmo747_928_cpld_nuvoton.dtbo \
-	imx6qdl-seco_quadmo747_928_uart4.dtbo
+	imx6qdl-seco_quadmo747_928_uart4.dtbo \
+	imx6qdl-seco_SBC_A62_touch_gt928.dtbo \
+	imx6qdl-seco_SBC_A62_touch_st1232.dtbo \
+	imx6qdl-seco_SBC_A62_conn_j8.dtbo
 
 
 targets += dtbs dtbs_install
