@@ -1,0 +1,3 @@
+[submodule "tools/seco-expansion"]
+	path = tools/seco-expansion
+	url = git@git.seco.com:arm/nxp/imx6/bsp8/develop/tools-imx-expansion-connector.git
