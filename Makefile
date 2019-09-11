@@ -515,6 +515,8 @@ config: scripts_basic outputmakefile FORCE
 %config: scripts_basic outputmakefile FORCE
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
 
+%secoconfig:
+	$(Q)$(MAKE) $(build)=tools/seco-expansion $@
 else
 # ===========================================================================
 # Build targets only - this includes vmlinux, arch specific targets, clean
