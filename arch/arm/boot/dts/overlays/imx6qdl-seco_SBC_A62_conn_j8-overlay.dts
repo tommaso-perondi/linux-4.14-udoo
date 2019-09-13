@@ -2,5 +2,74 @@
 /dts-v1/;
 /plugin/;
 
-/{
+/ {
+	compatible = "fsl,imx6q-SBC_A62", "fsl,imx6dl-SBC_A62", "fsl,imx6q", "fsl,imx6dl";
+
+    
+
+   fragment0 {
+        target = <&iomuxc>;
+        __overlay__ {
+            pinctrl-0 = < &pinctrl_hog  &pinctrl_j8_port1_gpio &pinctrl_j8_port2_gpio &pinctrl_j8_port3_gpio &pinctrl_j8_port5_gpio3 &pinctrl_j8_port7_gpio &pinctrl_j8_port9_gpio >; 
+        };
+    };
+
+
+
+fragment@1 {
+
+		target = <&uart4>;
+		__overlay__ {
+		
+			pinctrl-0     = <&pinctrl_j8_port4_1>;
+			status        = "okay";
+
+		};
+	
 };
+
+
+fragment@2 {
+
+		target = <&usdhc1>;
+		__overlay__ {
+		
+			status = "okay";
+
+		};
+	
+};
+
+
+fragment@3 {
+
+		target = <&uart1>;
+		__overlay__ {
+		
+			/delete-property/ rs485-cts-gpio;
+			/delete-property/ fsl,rs485-mode;
+			status = "okay";
+
+		};
+	
+};
+
+
+fragment@4 {
+
+		target = <&uart5>;
+		__overlay__ {
+
+			status = "okay";
+
+		};
+	
+};
+
+
+
+
+};
+
+
+
