@@ -419,9 +419,10 @@ static void gtp_reverse_xy (struct goodix_ts_data* ts, s32 *x, s32 *y) {
 
 static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
 {
-#if GTP_CHANGE_X2Y
-    GTP_SWAP(x, y);
-#endif
+    if ( ts->change_xy ) {
+        GTP_SWAP(x, y);
+    }
+
 
 if ( ts->reverse_xy )
 	gtp_reverse_xy (ts, &x, &y);
@@ -524,9 +525,9 @@ static void gtp_pen_down(s32 x, s32 y, s32 w, s32 id)
 {
     struct goodix_ts_data *ts = i2c_get_clientdata(i2c_connect_client);
 
-#if GTP_CHANGE_X2Y
+if ( ts->change_xy ) {
     GTP_SWAP(x, y);
-#endif
+}
     
 if ( ts->reverse_xy )
 	gtp_reverse_xy (ts, &x, &y);
@@ -1662,32 +1663,53 @@ static ssize_t gt91xx_config_read_proc(struct file *file, char __user *page, siz
     char *ptr = page;
     char temp_data[GTP_CONFIG_MAX_LENGTH + 2] = {0x80, 0x47};
     int i;
+    char output[750];
+    int count = 0;
     
     if (*ppos)
     {
         return 0;
     }
-    ptr += sprintf(ptr, "==== GT9XX config init value====\n");
+
+    count = sprintf(output, "==== GT9XX config init value====\n");
+    raw_copy_to_user( ptr, output, count );
+    ptr += count;
 
     for (i = 0 ; i < GTP_CONFIG_MAX_LENGTH ; i++)
     {
-        ptr += sprintf(ptr, "0x%02X ", config[i + 2]);
+        count = sprintf(output, "0x%02X ", config[i + 2]);
+        raw_copy_to_user( ptr, output, count );
+        ptr += count;
 
-        if (i % 8 == 7)
-            ptr += sprintf(ptr, "\n");
+        if (i % 8 == 7) {
+            count = sprintf(output, "\n");
+            raw_copy_to_user( ptr, output, count );
+            ptr += count;
+        }
     }
 
-    ptr += sprintf(ptr, "\n");
+    count = sprintf(output, "\n");
+    raw_copy_to_user( ptr, output, count );
+    ptr += count;
 
-    ptr += sprintf(ptr, "==== GT9XX config real value====\n");
+    count = sprintf(output, "==== GT9XX config real value====\n");
+    raw_copy_to_user( ptr, output, count );
+    ptr += count;
+
     gtp_i2c_read(i2c_connect_client, temp_data, GTP_CONFIG_MAX_LENGTH + 2);
     for (i = 0 ; i < GTP_CONFIG_MAX_LENGTH ; i++)
     {
-        ptr += sprintf(ptr, "0x%02X ", temp_data[i+2]);
+        count = sprintf(output, "0x%02X ", temp_data[i + 2]);
+        raw_copy_to_user( ptr, output, count );
+        ptr += count;
 
-        if (i % 8 == 7)
-            ptr += sprintf(ptr, "\n");
+        if (i % 8 == 7) {
+            count = sprintf(output, "\n");
+            raw_copy_to_user( ptr, output, count );
+            ptr += count;
+        }
     }
+
     *ppos += ptr - page;
     return (ptr - page);
 }
@@ -1926,9 +1948,10 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
     input_set_capability(ts->input_dev, EV_KEY, KEY_POWER);
 #endif 
 
-#if GTP_CHANGE_X2Y
-    GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
-#endif
+    if ( ts->change_xy ) {
+        GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
+    }
+
 
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, ts->abs_x_max, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, ts->abs_y_max, 0, 0);
@@ -2466,6 +2489,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         of_property_read_u32(client->dev.of_node, "ts-max-width", &ts->abs_x_max);
         of_property_read_u32(client->dev.of_node, "ts-max-height", &ts->abs_y_max);
     	ts->reverse_xy = of_property_read_bool(client->dev.of_node, "ts-reverse-xy");
+        ts->change_xy = of_property_read_bool(client->dev.of_node, "ts-change-xy");
 	of_property_read_u32(client->dev.of_node, "sensor-id", &ts->sensor_id);
     } else {
 	ts->abs_x_max = GTP_MAX_WIDTH;
@@ -2473,6 +2497,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 	ts->reset_gpio = GTP_RST_PORT;
 	ts->int_gpio = GTP_INT_PORT;
 	ts->reverse_xy = GTP_REVERSE_XY;
+    ts->change_xy = GTP_CHANGE_X2Y;
 	ts->sensor_id = -1;
     }
     ts->int_trigger_type = GTP_INT_TRIGGER;
