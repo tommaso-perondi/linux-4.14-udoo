@@ -1,0 +1,60 @@
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "fsl,imx6sx-SBC_B08", "fsl,imx6sx";
+
+    
+
+   fragment0 {
+        target = <&iomuxc>;
+        __overlay__ {
+            pinctrl-0 = < &pinctrl_hog  &pinctrl_j9_port1_gpio &pinctrl_j9_port3_gpio &pinctrl_j9_port4_gpio &pinctrl_j9_port5_gpio &pinctrl_j9_port8_gpio &pinctrl_j9_port9_gpio &pinctrl_j9_port10_gpio &pinctrl_j9_port11_gpio &pinctrl_j9_port12_gpio &pinctrl_j9_port13_gpio >; 
+        };
+    };
+
+
+
+fragment@1 {
+
+		target = <&ecspi5>;
+        __overlay__ {
+
+            status = "okay";
+
+		};
+	
+};
+
+
+fragment@2 {
+
+		target = <&spdif>;
+		__overlay__ {
+		
+			status = "okay";
+
+		};
+	
+};
+
+
+fragment@3 {
+
+		target = <&audmux>;
+		__overlay__ {
+		
+			status = "okay";
+
+		};
+	
+};
+
+
+
+
+};
+
+
+

@@ -1,0 +1,37 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "fsl,imx6sx-SBC_B08", "fsl,imx6sx";
+
+    
+	fragment0 {
+        target = <&blk_lcdif1>;
+        __overlay__ {
+            
+			status = "okay";
+
+        };
+    };
+
+
+	fragment1 {
+        target = <&lcdif1>;
+        __overlay__ {
+            
+			status = "okay";
+			
+        };
+    };
+
+
+	fragment2 {
+        target = <&gt911>;
+        __overlay__ {
+            
+			status = "okay";
+
+        };
+    };
+
+};
