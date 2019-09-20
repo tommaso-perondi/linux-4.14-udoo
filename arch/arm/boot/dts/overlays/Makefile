@@ -13,7 +13,9 @@ dtbo-$(CONFIG_SOC_IMX6Q) += \
 	imx6qdl-seco_quadmo747_928_uart4.dtbo \
 	imx6qdl-seco_SBC_A62_touch_gt928.dtbo \
 	imx6qdl-seco_SBC_A62_touch_st1232.dtbo \
-	imx6qdl-seco_SBC_A62_conn_j8.dtbo \
+	imx6qdl-seco_SBC_A62_conn_j8.dtbo
+
+dtbo-$(CONFIG_SOC_IMX6SX) += \
 	imx6sx-seco_SBC_B08_LVDS.dtbo \
 	imx6sx-seco_SBC_B08_RGB.dtbo \
 	imx6sx-seco_SBC_B08_conn_j9.dtbo
