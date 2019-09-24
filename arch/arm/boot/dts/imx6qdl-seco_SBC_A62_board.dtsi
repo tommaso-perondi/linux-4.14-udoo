@@ -230,7 +230,7 @@
 
 
 /*  PORT 9/10  */
-&uart2 {
+&uart5 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_j8_port9_3>;
 	status        = "disabled";
