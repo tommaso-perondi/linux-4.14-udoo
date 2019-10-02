@@ -138,7 +138,7 @@
 		fb-names                 = "mxs-lcdif1";
         default-on;
 		enable-gpios             = <&gpio5 23 0>;
-		status                   = "disabled";
+		status                   = "okay";
 	};	
 
 
