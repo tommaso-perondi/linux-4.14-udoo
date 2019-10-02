@@ -63,6 +63,7 @@
 			enable-active-high;
 			regulator-boot-on;
 			regulator-always-on;
+			status                  = "disabled";
 		};
 
 		reg_2p5v_sgtl5000: regulator@3 {
@@ -307,6 +308,7 @@
 	hdmi_edid: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
 		reg        = <0x50>;
+		status     = "disabled";
 	};
 
 };
@@ -478,7 +480,7 @@
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_pwm1>;
-	status        = "okay";
+	status        = "disabled";
 };
 
 
@@ -522,21 +524,21 @@
  * |__________________________________________________________________________|
  */
 &hdmi_audio {
-	status = "okay";
+	status = "disabled";
 };
 
 
 &hdmi_core {
 	ipu_id  = <0>;
 	disp_id = <0>;
-	status  = "okay";
+	status  = "disabled";
 };
 
 
 &hdmi_video {
 	fsl,phy_reg_vlev    = <0x0294>;
 	fsl,phy_reg_cksymtx = <0x800d>;
-	status              = "okay";
+	status              = "disabled";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
