@@ -52,6 +52,7 @@
 			enable-active-high;
 			regulator-boot-on;
 			regulator-always-on;
+			status                  = "disabled";
 		};
 
 	};
@@ -104,7 +105,6 @@
 		late_init = <0>;
 		status = "disabled";
 	};
-
 
 	backlight {
 		compatible               = "pwm-backlight";
@@ -476,7 +476,7 @@
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0     = <&pinctrl_pwm1>;
-	status        = "okay";
+	status        = "disabled";
 };
 
 
@@ -576,22 +576,24 @@
  * |__________________________________________________________________________|
  */
 &hdmi_audio {
-	status = "okay";
+	status = "disabled";
 };
 
 
 &hdmi_core {
 	ipu_id  = <0>;
 	disp_id = <0>;
-	status  = "okay";
+	status  = "disabled";
 };
 
 
 &hdmi_video {
 	fsl,phy_reg_vlev    = <0x0294>;
 	fsl,phy_reg_cksymtx = <0x800d>;
-	status              = "okay";
+	status              = "disabled";
 };
+
+
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
