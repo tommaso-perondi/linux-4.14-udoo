@@ -307,9 +307,9 @@
 	};
 
 
-	gt928: gt928@5d {
+	gt928: gt928@14 {
 		compatible       = "goodix,gt928";
-		reg              = <0x5d>;
+		reg              = <0x14>;
 
 		pinctrl-names    = "default";
 		pinctrl-0        = <&pinctrl_st1232>;
@@ -321,7 +321,8 @@
 		reset-gpio       = <15>;
 		ts-max-width     = <1280>;
 		ts-max-height    = <800>;
-
+		
+		ts-reverse-y;
 		ts-max-finger    = <1>;
 		sensor-id        = <0>;
 		status           = "disabled";

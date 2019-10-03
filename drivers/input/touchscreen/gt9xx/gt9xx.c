@@ -417,6 +417,16 @@ static void gtp_reverse_xy (struct goodix_ts_data* ts, s32 *x, s32 *y) {
 }
 
 
+static void gtp_reverse_x (struct goodix_ts_data* ts, s32 *x) {
+	*x = ts->abs_x_max - *x;
+}
+
+
+static void gtp_reverse_y (struct goodix_ts_data* ts, s32 *y) {
+	*y = ts->abs_y_max - *y;
+}
+
+
 static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
 {
     if ( ts->change_xy ) {
@@ -424,8 +434,12 @@ static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
     }
 
 
-if ( ts->reverse_xy )
+if ( ts->reverse_xy ) 
 	gtp_reverse_xy (ts, &x, &y);
+else if ( ts->reverse_x )
+    gtp_reverse_x (ts, &x);
+else if ( ts->reverse_y ) 
+    gtp_reverse_y (ts, &y);
 
 #if GTP_ICS_SLOT_REPORT
     input_mt_slot(ts->input_dev, id);
@@ -529,8 +543,12 @@ if ( ts->change_xy ) {
     GTP_SWAP(x, y);
 }
     
-if ( ts->reverse_xy )
+if ( ts->reverse_xy ) 
 	gtp_reverse_xy (ts, &x, &y);
+else if ( ts->reverse_x )
+    gtp_reverse_x (ts, &x);
+else if ( ts->reverse_y )
+    gtp_reverse_y (ts, &y);
 
 
     input_report_key(ts->pen_dev, BTN_TOOL_PEN, 1);
@@ -1367,12 +1385,12 @@ static s32 gtp_get_info(struct goodix_ts_data *ts)
     u8 opr_buf[6] = {0};
     s32 ret = 0;
     
-    ts->abs_x_max = GTP_MAX_WIDTH;
-	if ( ts->sensor_id == 0 ) 
-	    ts->abs_y_max = GTP_MAX_HEIGHT;
-	else
-		ts->abs_y_max = GTP_MAX_HEIGHT2;
-    ts->int_trigger_type = GTP_INT_TRIGGER;
+    // ts->abs_x_max = GTP_MAX_WIDTH;
+	// if ( ts->sensor_id == 0 ) 
+	//     ts->abs_y_max = GTP_MAX_HEIGHT;
+	// else
+	// 	ts->abs_y_max = GTP_MAX_HEIGHT2;
+    // ts->int_trigger_type = GTP_INT_TRIGGER;
         
     opr_buf[0] = (u8)((GTP_REG_CONFIG_DATA+1) >> 8);
     opr_buf[1] = (u8)((GTP_REG_CONFIG_DATA+1) & 0xFF);
@@ -1547,15 +1565,15 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[sensor_id], ts->gtp_cfg_len);
 
 #if GTP_CUSTOM_CFG
-    config[RESOLUTION_LOC]     = (u8)GTP_MAX_WIDTH;
-    config[RESOLUTION_LOC + 1] = (u8)(GTP_MAX_WIDTH>>8);
-	if ( ts->sensor_id == 0 ) {
-  	  config[RESOLUTION_LOC + 2] = (u8)GTP_MAX_HEIGHT;
-   	  config[RESOLUTION_LOC + 3] = (u8)(GTP_MAX_HEIGHT>>8);
-	} else {
-	  config[RESOLUTION_LOC + 2] = (u8)GTP_MAX_HEIGHT2;
-   	  config[RESOLUTION_LOC + 3] = (u8)(GTP_MAX_HEIGHT2>>8);
-	}
+    config[RESOLUTION_LOC]     = (u8)ts->abs_y_max;
+    config[RESOLUTION_LOC + 1] = (u8)(ts->abs_x_max>>8);
+	// if ( ts->sensor_id == 0 ) {
+  	//   config[RESOLUTION_LOC + 2] = (u8)GTP_MAX_HEIGHT;
+   	//   config[RESOLUTION_LOC + 3] = (u8)(GTP_MAX_HEIGHT>>8);
+	// } else {
+	//   config[RESOLUTION_LOC + 2] = (u8)GTP_MAX_HEIGHT2;
+   	//   config[RESOLUTION_LOC + 3] = (u8)(GTP_MAX_HEIGHT2>>8);
+	// }
     
     if (GTP_INT_TRIGGER == 0)  //RISING
     {
@@ -2489,6 +2507,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         of_property_read_u32(client->dev.of_node, "ts-max-width", &ts->abs_x_max);
         of_property_read_u32(client->dev.of_node, "ts-max-height", &ts->abs_y_max);
     	ts->reverse_xy = of_property_read_bool(client->dev.of_node, "ts-reverse-xy");
+        ts->reverse_x = of_property_read_bool(client->dev.of_node, "ts-reverse-x");
+        ts->reverse_y = of_property_read_bool(client->dev.of_node, "ts-reverse-y");
         ts->change_xy = of_property_read_bool(client->dev.of_node, "ts-change-xy");
 	of_property_read_u32(client->dev.of_node, "sensor-id", &ts->sensor_id);
     } else {
