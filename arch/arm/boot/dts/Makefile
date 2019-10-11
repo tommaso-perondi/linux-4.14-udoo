@@ -499,6 +499,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
 	imx6qp-zii-rdu2.dtb \
 	imx6q-seco_SBC_A62.dtb \
 	imx6dl-seco_SBC_A62.dtb \
+	imx6q-seco_SYS_A62_10.dtb \
+	imx6dl-seco_SYS_A62_10.dtb \
 	imx6q-seco_uQ7_962.dtb \
 	imx6dl-seco_uQ7_962.dtb \
 	imx6q-seco_uQ7_J_A75.dtb \
