@@ -106,17 +106,6 @@
 		};
 	};
 
-	kim {
-	        compatible = "kim";
-	        nshutdown_gpio = <49>;  // GPIO2_17 The wl8 driver expects gpio to be an integer, so gpio2_17 is (2-1)*32+17=49
-	        dev_name = "/dev/ttymxc2";
-	        flow_cntrl = <1>;
-	        baud_rate = <921600>;
-	};
-
-	btwilink {
-	        compatible = "btwilink";
-	};
 };
 
 &cpu0 {
@@ -355,9 +344,13 @@
 				MX6SX_PAD_SD3_DATA5__UART3_TX		0x13059
 				MX6SX_PAD_SD3_DATA6__UART3_RTS_B	0x13059
 				MX6SX_PAD_SD3_DATA7__UART3_CTS_B	0x13059
-				MX6SX_PAD_KEY_ROW2__GPIO2_IO_17		0x15059
 			>;
 		};
+		pinctrl_bt_reg: btgrp-1 {
+                       fsl,pins = <
+                               MX6SX_PAD_KEY_ROW2__GPIO2_IO_17         0x15059
+                       >;
+                };
 
 		pinctrl_usb_otg1: usbotg1grp {
 			fsl,pins = <
@@ -531,8 +524,16 @@
 &uart3 { /* for bluetooth */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3_1>;
-	fsl,uart-has-rtscts;
+	uart-has-rtscts;
+	dma-names = "", "tx";
 	status = "okay";
+        bluetooth {
+                compatible = "ti,wl1831-st";
+                enable-gpios = <&gpio2 17 GPIO_ACTIVE_HIGH>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_bt_reg>;
+                max-speed = <921600>;
+        };
 };
 
 &usbotg1 { /* J2 micro USB port */
